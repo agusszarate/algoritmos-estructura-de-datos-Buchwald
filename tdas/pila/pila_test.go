@@ -1,13 +1,17 @@
 package pila_test
 
 import (
-	"github.com/stretchr/testify/require"
 	TDAPila "tdas/pila"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPilaVacia(t *testing.T) {
 	pila := TDAPila.CrearPilaDinamica[int]()
 	require.True(t, pila.EstaVacia())
-	// mas pruebas para este caso...
+
+	require.Panics(t, func() { pila.VerTope() })
+
+	require.Panics(t, func() { pila.Desapilar() })
 }
