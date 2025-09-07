@@ -15,3 +15,18 @@ func TestPilaVacia(t *testing.T) {
 
 	require.Panics(t, func() { pila.Desapilar() })
 }
+
+func TestApilar(t *testing.T) {
+	pila := TDAPila.CrearPilaDinamica[any]()
+
+	pila.Apilar(1)
+	require.Equal(t, 1, pila.Desapilar())
+
+	pila.Apilar("test")
+	require.Equal(t, "test", pila.Desapilar())
+
+	pila.Apilar(1)
+	pila.Apilar("1")
+	require.Equal(t, "1", pila.Desapilar())
+	require.Equal(t, 1, pila.Desapilar())
+}
