@@ -16,7 +16,7 @@ func TestPilaVacia(t *testing.T) {
 	require.Panics(t, func() { pila.Desapilar() })
 }
 
-func TestApilar(t *testing.T) {
+func TestApilarYDesapilar(t *testing.T) {
 	pila := TDAPila.CrearPilaDinamica[any]()
 
 	pila.Apilar(1)

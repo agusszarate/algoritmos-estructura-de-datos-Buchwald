@@ -51,15 +51,17 @@ func main() {
 
 	archivo1 := leer(ruta1)
 	archivo2 := leer(ruta2)
+
+	var mayorVector []int
 	resultado := ejercicios.Comparar(archivo1, archivo2)
 
 	switch resultado {
 	case -1:
-		imprimirOrdenado(archivo2)
-	case 0:
-		imprimirOrdenado(archivo1)
-	case 1:
-		imprimirOrdenado(archivo1)
+		mayorVector = archivo2
+	case 0, 1:
+		mayorVector = archivo1
 	}
+
+	imprimirOrdenado(mayorVector)
 
 }

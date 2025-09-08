@@ -22,10 +22,11 @@ func (p *pilaDinamica[T]) VerTope() T {
 }
 
 func (p *pilaDinamica[T]) Apilar(elemento T) {
-	p.checkRedimension()
 
 	p.datos = append(p.datos, elemento)
 	p.cantidad += 1
+
+	p.checkRedimension()
 }
 
 func (p *pilaDinamica[T]) Desapilar() T {
@@ -47,15 +48,15 @@ func (p *pilaDinamica[T]) panicVacia() {
 }
 
 func (p *pilaDinamica[T]) checkRedimension() {
-	if len(p.datos) == p.cantidad {
-		p.redimensionar(FACTOR_REDIMENSION)
+	if cap(p.datos) == p.cantidad {
+		p.redimensionar(cap(p.datos) * FACTOR_REDIMENSION)
 	} else if p.cantidad <= cap(p.datos)/FACTOR_ACHICAR {
-		p.redimensionar(1 / FACTOR_REDIMENSION)
+		p.redimensionar(cap(p.datos) / FACTOR_REDIMENSION)
 	}
 }
 
-func (p *pilaDinamica[T]) redimensionar(factor int) {
-	nuevosDatos := make([]T, cap(p.datos)*factor)
+func (p *pilaDinamica[T]) redimensionar(nuevoTamaño int) {
+	nuevosDatos := make([]T, p.cantidad, nuevoTamaño)
 
 	copy(nuevosDatos, p.datos[:p.cantidad])
 
@@ -63,5 +64,8 @@ func (p *pilaDinamica[T]) redimensionar(factor int) {
 }
 
 func CrearPilaDinamica[T any]() Pila[T] {
-	return new(pilaDinamica[T])
+	return &pilaDinamica[T]{
+		datos:    make([]T, 0, 2),
+		cantidad: 0,
+	}
 }

@@ -8,16 +8,16 @@ func Swap(x *int, y *int) {
 // Maximo devuelve la posición del mayor elemento del arreglo, o -1 si el el arreglo es de largo 0. Si el máximo
 // elemento aparece más de una vez, se debe devolver la primera posición en que ocurre.
 func Maximo(vector []int) int {
-	var posMax int = -1
 
-	if len(vector) > 0 {
-		var max int = vector[0]
-		posMax = 0
-		for i := 1; i < len(vector); i++ {
-			if vector[i] > max {
-				max = vector[i]
-				posMax = i
-			}
+	if len(vector) == 0 {
+		return -1
+	}
+
+	var posMax int = 0
+
+	for i := 1; i < len(vector); i++ {
+		if vector[i] > vector[posMax] {
+			posMax = i
 		}
 	}
 
@@ -29,29 +29,21 @@ func Maximo(vector []int) int {
 // Un arreglo es menor a otro cuando al compararlos elemento a elemento, el primer elemento en el que difieren
 // no existe o es menor.
 func Comparar(vector1 []int, vector2 []int) int {
-	minLen := len(vector1)
-	if len(vector2) < minLen {
-		minLen = len(vector2)
-	}
-
-	result := 0
-	for i := 0; i < minLen && result == 0; i++ {
+	for i := 0; i < len(vector1) && i < len(vector2); i++ {
 		if vector1[i] < vector2[i] {
-			result = -1
+			return -1
 		} else if vector1[i] > vector2[i] {
-			result = 1
+			return 1
 		}
 	}
 
-	if result == 0 {
-		if len(vector1) < len(vector2) {
-			result = -1
-		} else if len(vector1) > len(vector2) {
-			result = 1
-		}
+	if len(vector1) < len(vector2) {
+		return -1
+	} else if len(vector1) > len(vector2) {
+		return 1
 	}
 
-	return result
+	return 0
 }
 
 // Seleccion ordena el arreglo recibido mediante el algoritmo de selección.
@@ -60,9 +52,7 @@ func Seleccion(vector []int) {
 
 		maxPos := Maximo(vector[:i+1])
 
-		if maxPos != i {
-			Swap(&vector[maxPos], &vector[i])
-		}
+		Swap(&vector[maxPos], &vector[i])
 	}
 }
 
