@@ -23,7 +23,7 @@ func (cola *colaEnlazada[T]) VerPrimero() T {
 
 func (cola *colaEnlazada[T]) Encolar(elemento T) {
 
-	nuevoNodo := &nodo[T]{dato: elemento, proximo: nil}
+	nuevoNodo := cola.crearNodo(elemento)
 
 	if cola.cantidad == 0 {
 		cola.primerNodo = nuevoNodo
@@ -51,6 +51,10 @@ func (cola colaEnlazada[T]) panicVacia() {
 	if cola.EstaVacia() {
 		panic("La cola esta vacia")
 	}
+}
+
+func (cola colaEnlazada[T]) crearNodo(elemento T) *nodo[T] {
+	return &nodo[T]{dato: elemento, proximo: nil}
 }
 
 func CrearColaEnlazada[T any]() Cola[T] {
