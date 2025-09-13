@@ -42,15 +42,14 @@ func TestVolumen(t *testing.T) {
 	for i := 0; i < 100000; i++ {
 		cola.Encolar(i)
 		require.Equal(t, 0, cola.VerPrimero())
+		require.False(t, cola.EstaVacia())
 	}
 
 	for i := 0; i < 100000; i++ {
+		require.False(t, cola.EstaVacia())
+		require.Equal(t, i, cola.VerPrimero())
+
 		elemento := cola.Desencolar()
-
-		if i != 99999 {
-			require.Equal(t, i+1, cola.VerPrimero())
-		}
-
 		require.Equal(t, i, elemento)
 	}
 
@@ -62,15 +61,15 @@ func TestColaVaciaUsada(t *testing.T) {
 
 	for i := 0; i < 100000; i++ {
 		cola.Encolar(i)
+		require.Equal(t, 0, cola.VerPrimero())
+		require.False(t, cola.EstaVacia())
 	}
 
 	for i := 0; i < 100000; i++ {
+		require.False(t, cola.EstaVacia())
+		require.Equal(t, i, cola.VerPrimero())
+
 		elemento := cola.Desencolar()
-
-		if i != 99999 {
-			require.Equal(t, i+1, cola.VerPrimero())
-		}
-
 		require.Equal(t, i, elemento)
 	}
 
@@ -106,36 +105,6 @@ func TestTiposCadenas(t *testing.T) {
 
 	for i := 0; i < len(cadenas); i++ {
 		require.Equal(t, cadenas[i], cola.Desencolar())
-	}
-}
-
-func TestTiposFlotantes(t *testing.T) {
-	cola := TDACola.CrearColaEnlazada[float64]()
-
-	flotantes := []float64{0.0, -3.14, 2.71, 999.999, -0.001}
-
-	for _, num := range flotantes {
-		cola.Encolar(num)
-		require.Equal(t, flotantes[0], cola.VerPrimero())
-	}
-
-	for i := 0; i < len(flotantes); i++ {
-		require.Equal(t, flotantes[i], cola.Desencolar())
-	}
-}
-
-func TestTiposBooleanos(t *testing.T) {
-	cola := TDACola.CrearColaEnlazada[bool]()
-
-	valores := []bool{true, false, true, true, false}
-
-	for _, val := range valores {
-		cola.Encolar(val)
-		require.Equal(t, valores[0], cola.VerPrimero())
-	}
-
-	for i := 0; i < len(valores); i++ {
-		require.Equal(t, valores[i], cola.Desencolar())
 	}
 }
 

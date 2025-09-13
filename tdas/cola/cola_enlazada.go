@@ -12,7 +12,7 @@ type colaEnlazada[T any] struct {
 }
 
 func (cola colaEnlazada[T]) EstaVacia() bool {
-	return cola.cantidad == 0
+	return cola.cantidad == 0 && cola.primerNodo == nil && cola.ultimoNodo == nil
 }
 
 func (cola *colaEnlazada[T]) VerPrimero() T {
@@ -43,6 +43,10 @@ func (cola *colaEnlazada[T]) Desencolar() T {
 	elemento := cola.primerNodo
 	cola.primerNodo = cola.primerNodo.proximo
 	cola.cantidad--
+
+	if cola.cantidad == 0 {
+		cola.ultimoNodo = nil
+	}
 
 	return elemento.dato
 }
