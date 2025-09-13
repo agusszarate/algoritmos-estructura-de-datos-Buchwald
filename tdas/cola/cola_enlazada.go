@@ -27,11 +27,11 @@ func (cola *colaEnlazada[T]) Encolar(elemento T) {
 
 	if cola.cantidad == 0 {
 		cola.primerNodo = nuevoNodo
-		cola.ultimoNodo = nuevoNodo
 	} else {
 		cola.ultimoNodo.proximo = nuevoNodo
-		cola.ultimoNodo = nuevoNodo
 	}
+
+	cola.ultimoNodo = nuevoNodo
 
 	cola.cantidad++
 

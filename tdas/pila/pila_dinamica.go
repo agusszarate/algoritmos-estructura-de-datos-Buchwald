@@ -3,8 +3,9 @@ package pila
 /* Definición del struct pila proporcionado por la cátedra. */
 
 const (
-	FACTOR_REDIMENSION = 2
-	FACTOR_ACHICAR     = 4
+	_FACTOR_REDIMENSION = 2
+	_FACTOR_ACHICAR     = 4
+	_LARGO_INICIAL      = 5
 )
 
 type pilaDinamica[T any] struct {
@@ -23,20 +24,26 @@ func (p *pilaDinamica[T]) VerTope() T {
 
 func (p *pilaDinamica[T]) Apilar(elemento T) {
 
-	p.datos = append(p.datos, elemento)
-	p.cantidad += 1
+	if len(p.datos) == p.cantidad {
+		p.redimensionar(len(p.datos) * _FACTOR_REDIMENSION)
+	}
 
-	p.checkRedimension()
+	p.datos[p.cantidad] = elemento
+	p.cantidad++
+
 }
 
 func (p *pilaDinamica[T]) Desapilar() T {
 	p.panicVacia()
 
-	elemento := p.datos[p.cantidad-1]
-	p.datos = p.datos[:p.cantidad-1]
-	p.cantidad -= 1
+	p.cantidad--
+	elemento := p.datos[p.cantidad]
 
-	p.checkRedimension()
+	nuevoTamaño := cap(p.datos) / _FACTOR_REDIMENSION
+
+	if p.cantidad <= cap(p.datos)/_FACTOR_ACHICAR && nuevoTamaño >= _LARGO_INICIAL {
+		p.redimensionar(nuevoTamaño)
+	}
 
 	return elemento
 }
@@ -47,16 +54,8 @@ func (p *pilaDinamica[T]) panicVacia() {
 	}
 }
 
-func (p *pilaDinamica[T]) checkRedimension() {
-	if cap(p.datos) == p.cantidad {
-		p.redimensionar(cap(p.datos) * FACTOR_REDIMENSION)
-	} else if p.cantidad <= cap(p.datos)/FACTOR_ACHICAR {
-		p.redimensionar(cap(p.datos) / FACTOR_REDIMENSION)
-	}
-}
-
 func (p *pilaDinamica[T]) redimensionar(nuevoTamaño int) {
-	nuevosDatos := make([]T, p.cantidad, nuevoTamaño)
+	nuevosDatos := make([]T, nuevoTamaño)
 
 	copy(nuevosDatos, p.datos[:p.cantidad])
 
@@ -65,7 +64,7 @@ func (p *pilaDinamica[T]) redimensionar(nuevoTamaño int) {
 
 func CrearPilaDinamica[T any]() Pila[T] {
 	return &pilaDinamica[T]{
-		datos:    make([]T, 0, 2),
+		datos:    make([]T, _LARGO_INICIAL),
 		cantidad: 0,
 	}
 }

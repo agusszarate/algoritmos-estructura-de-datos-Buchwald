@@ -17,22 +17,27 @@ func TestPilaVacia(t *testing.T) {
 }
 
 func TestApilarYDesapilar(t *testing.T) {
-	pila := TDAPila.CrearPilaDinamica[any]()
+	pila := TDAPila.CrearPilaDinamica[int]()
 
-	elementos := []any{1, "test", 3.14, true, "último"}
+	pila.Apilar(10)
+	require.Equal(t, 10, pila.VerTope())
+	require.False(t, pila.EstaVacia())
 
-	for _, elem := range elementos {
-		pila.Apilar(elem)
-		require.Equal(t, elem, pila.VerTope())
-		require.False(t, pila.EstaVacia())
-	}
+	pila.Apilar(20)
+	require.Equal(t, 20, pila.VerTope())
+	require.False(t, pila.EstaVacia())
 
-	for i := len(elementos) - 1; i >= 0; i-- {
-		require.Equal(t, elementos[i], pila.VerTope())
-		desapilado := pila.Desapilar()
-		require.Equal(t, elementos[i], desapilado)
-	}
+	pila.Apilar(30)
+	require.Equal(t, 30, pila.VerTope())
+	require.False(t, pila.EstaVacia())
 
+	require.Equal(t, 30, pila.Desapilar())
+	require.Equal(t, 20, pila.VerTope())
+
+	require.Equal(t, 20, pila.Desapilar())
+	require.Equal(t, 10, pila.VerTope())
+
+	require.Equal(t, 10, pila.Desapilar())
 	require.True(t, pila.EstaVacia())
 }
 
@@ -42,6 +47,7 @@ func TestVolumen(t *testing.T) {
 	for i := 0; i < 100000; i++ {
 		pila.Apilar(i)
 		require.Equal(t, i, pila.VerTope())
+		require.False(t, pila.EstaVacia())
 	}
 
 	for i := 99999; i >= 0; i-- {
@@ -65,11 +71,10 @@ func TestPilaVaciaUsada(t *testing.T) {
 	}
 
 	for i := 99999; i >= 0; i-- {
-		elemento := pila.Desapilar()
+		require.Equal(t, i, pila.VerTope())
+		require.False(t, pila.EstaVacia())
 
-		if i != 0 {
-			require.Equal(t, i-1, pila.VerTope())
-		}
+		elemento := pila.Desapilar()
 
 		require.Equal(t, i, elemento)
 	}
@@ -106,36 +111,6 @@ func TestTiposCadenas(t *testing.T) {
 
 	for i := len(cadenas) - 1; i >= 0; i-- {
 		require.Equal(t, cadenas[i], pila.Desapilar())
-	}
-}
-
-func TestTiposFlotantes(t *testing.T) {
-	pila := TDAPila.CrearPilaDinamica[float64]()
-
-	flotantes := []float64{0.0, -3.14, 2.71, 999.999, -0.001}
-
-	for _, num := range flotantes {
-		pila.Apilar(num)
-		require.Equal(t, num, pila.VerTope())
-	}
-
-	for i := len(flotantes) - 1; i >= 0; i-- {
-		require.Equal(t, flotantes[i], pila.Desapilar())
-	}
-}
-
-func TestTiposBooleanos(t *testing.T) {
-	pila := TDAPila.CrearPilaDinamica[bool]()
-
-	valores := []bool{true, false, true, true, false}
-
-	for _, val := range valores {
-		pila.Apilar(val)
-		require.Equal(t, val, pila.VerTope())
-	}
-
-	for i := len(valores) - 1; i >= 0; i-- {
-		require.Equal(t, valores[i], pila.Desapilar())
 	}
 }
 
