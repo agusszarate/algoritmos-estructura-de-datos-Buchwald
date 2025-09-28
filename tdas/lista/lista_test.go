@@ -148,43 +148,43 @@ func TestPanicoBorrarListaVacia(t *testing.T) {
 // 	}
 // }
 
-// func TestIterar(t *testing.T) {
-// 	lista := CrearListaEnlazada[int]()
-// 	lista.InsertarUltimo(1)
-// 	lista.InsertarUltimo(2)
-// 	lista.InsertarUltimo(3)
+func TestIterar(t *testing.T) {
+	lista := CrearListaEnlazada[int]()
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
 
-// 	contador := 0
-// 	suma := 0
+	contador := 0
+	suma := 0
 
-// 	lista.Iterar(func(elemento int) bool {
-// 		contador++
-// 		suma += elemento
-// 		return true
-// 	})
+	lista.Iterar(func(elemento int) bool {
+		contador++
+		suma += elemento
+		return true
+	})
 
-// 	if contador != 3 {
-// 		t.Error("Debe iterar 3 elementos")
-// 	}
-// 	if suma != 6 {
-// 		t.Error("Suma debe ser 6")
-// 	}
-// }
+	if contador != 3 {
+		t.Error("Debe iterar 3 elementos")
+	}
+	if suma != 6 {
+		t.Error("Suma debe ser 6")
+	}
+}
 
-// func TestIterarCorte(t *testing.T) {
-// 	lista := CrearListaEnlazada[int]()
-// 	lista.InsertarUltimo(1)
-// 	lista.InsertarUltimo(2)
-// 	lista.InsertarUltimo(3)
+func TestIterarCorte(t *testing.T) {
+	lista := CrearListaEnlazada[int]()
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
 
-// 	contador := 0
+	contador := 0
 
-// 	lista.Iterar(func(elemento int) bool {
-// 		contador++
-// 		return elemento < 2
-// 	})
+	lista.Iterar(func(elemento int) bool {
+		contador++
+		return elemento < 2
+	})
 
-// 	if contador != 2 {
-// 		t.Error("Debe iterar 2 elementos antes de cortar")
-// 	}
-// }
+	if contador != 2 {
+		t.Error("Debe iterar 2 elementos antes de cortar")
+	}
+}
