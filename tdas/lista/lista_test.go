@@ -124,29 +124,29 @@ func TestPanicoBorrarListaVacia(t *testing.T) {
 	lista.BorrarPrimero()
 }
 
-// func TestIterador(t *testing.T) {
-// 	lista := CrearListaEnlazada[int]()
-// 	lista.InsertarUltimo(1)
-// 	lista.InsertarUltimo(2)
-// 	lista.InsertarUltimo(3)
+func TestIterador(t *testing.T) {
+	lista := CrearListaEnlazada[int]()
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
 
-// 	iter := lista.Iterador()
-// 	contador := 0
-// 	valor := 1
+	iter := lista.Iterador()
+	contador := 0
+	valor := 1
 
-// 	for iter.HaySiguiente() {
-// 		if iter.VerActual() != valor {
-// 			t.Errorf("Valor actual debe ser %d, pero es %d", valor, iter.VerActual())
-// 		}
-// 		iter.Siguiente()
-// 		contador++
-// 		valor++
-// 	}
+	for iter.HaySiguiente() {
+		if iter.VerActual() != valor {
+			t.Errorf("Valor actual debe ser %d, pero es %d", valor, iter.VerActual())
+		}
+		iter.Siguiente()
+		contador++
+		valor++
+	}
 
-// 	if contador != 3 {
-// 		t.Error("Debe iterar 3 elementos")
-// 	}
-// }
+	if contador != 3 {
+		t.Error("Debe iterar 3 elementos")
+	}
+}
 
 func TestIterar(t *testing.T) {
 	lista := CrearListaEnlazada[int]()

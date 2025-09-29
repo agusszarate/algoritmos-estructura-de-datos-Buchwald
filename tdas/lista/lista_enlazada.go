@@ -10,8 +10,6 @@ type listaEnlazada[T any] struct {
 	largo   int
 }
 
-type iteradorListaEnlazada[T any] struct{}
-
 func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{primero: nil, ultimo: nil, largo: 0}
 }
@@ -106,9 +104,10 @@ func (lista listaEnlazada[T]) Iterar(visitar func(T) bool) {
 	}
 }
 
-func (lista listaEnlazada[T]) Iterador() IteradorLista[T] {
-}
-
-func (lista listaEnlazada[T]) CrearListaEnlazada() *listaEnlazada[T] {
-	return &listaEnlazada[T]{largo: 0, primero: nil, ultimo: nil}
+func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
+	return &iteradorListaEnlazada[T]{
+		lista:    lista,
+		actual:   lista.primero,
+		anterior: nil,
+	}
 }
