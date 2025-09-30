@@ -39,7 +39,7 @@ func (iter *iteradorListaEnlazada[T]) Insertar(elemento T) {
 		iter.anterior.siguiente = nuevo
 	}
 
-	if iter.actual.siguiente == nil {
+	if iter.actual == nil {
 		iter.lista.ultimo = nuevo
 	}
 
