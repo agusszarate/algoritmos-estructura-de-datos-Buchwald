@@ -1,11 +1,12 @@
-package lista
+package lista_test
 
 import (
+	TDALista "tdas/lista"
 	"testing"
 )
 
 func TestListaVacia(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	if !lista.EstaVacia() {
 		t.Error("Lista nueva debe estar vacía")
@@ -17,7 +18,7 @@ func TestListaVacia(t *testing.T) {
 }
 
 func TestInsertarPrimero(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarPrimero(10)
 	if lista.EstaVacia() {
@@ -46,7 +47,7 @@ func TestInsertarPrimero(t *testing.T) {
 }
 
 func TestInsertarUltimo(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarUltimo(10)
 	if lista.EstaVacia() {
@@ -75,7 +76,7 @@ func TestInsertarUltimo(t *testing.T) {
 }
 
 func TestBorrarPrimero(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarPrimero(10)
 	lista.InsertarPrimero(20)
@@ -101,7 +102,7 @@ func TestBorrarPrimero(t *testing.T) {
 }
 
 func TestPanicoListaVacia(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -113,7 +114,7 @@ func TestPanicoListaVacia(t *testing.T) {
 }
 
 func TestPanicoBorrarListaVacia(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -125,7 +126,7 @@ func TestPanicoBorrarListaVacia(t *testing.T) {
 }
 
 func TestIterador(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(1)
 	lista.InsertarUltimo(2)
 	lista.InsertarUltimo(3)
@@ -149,7 +150,7 @@ func TestIterador(t *testing.T) {
 }
 
 func TestIterar(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(1)
 	lista.InsertarUltimo(2)
 	lista.InsertarUltimo(3)
@@ -172,7 +173,7 @@ func TestIterar(t *testing.T) {
 }
 
 func TestIterarCorte(t *testing.T) {
-	lista := CrearListaEnlazada[int]()
+	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(1)
 	lista.InsertarUltimo(2)
 	lista.InsertarUltimo(3)
@@ -186,5 +187,107 @@ func TestIterarCorte(t *testing.T) {
 
 	if contador != 2 {
 		t.Error("Debe iterar 2 elementos antes de cortar")
+	}
+}
+
+func TestIteradorInsertar(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(20)
+	lista.InsertarUltimo(40)
+
+	iter := lista.Iterador()
+	iter.Insertar(10)
+	if lista.VerPrimero() != 10 {
+		t.Errorf("Primero debe ser 10 pero es %d", lista.VerPrimero())
+	}
+
+	iter = lista.Iterador()
+	iter.Siguiente()
+	iter.Siguiente()
+	iter.Insertar(30)
+
+	iter = lista.Iterador()
+	for iter.HaySiguiente() {
+		iter.Siguiente()
+	}
+	iter.Insertar(50)
+	if lista.VerUltimo() != 50 {
+		t.Errorf("Ultimo debe ser 50 pero es %d", lista.VerUltimo())
+	}
+
+	arr := []int{10, 20, 30, 40, 50}
+	valores := []int{}
+	lista.Iterar(func(v int) bool {
+		valores = append(valores, v)
+		return true
+	})
+	for i := range arr {
+		if valores[i] != arr[i] {
+			t.Errorf("Se esperaba %d pero se obtuvo %d", arr[i], valores[i])
+		}
+	}
+}
+
+func TestIteradorBorrar(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	for _, v := range []int{10, 20, 30, 40} {
+		lista.InsertarUltimo(v)
+	}
+
+	iter := lista.Iterador()
+	if iter.Borrar() != 10 {
+		t.Error("Se esperaba borrar 10")
+	}
+
+	iter = lista.Iterador()
+	if iter.Borrar() != 20 {
+		t.Error("Se esperaba borrar 20")
+	}
+	if iter.Borrar() != 30 {
+		t.Error("Se esperaba borrar 30")
+	}
+
+	iter = lista.Iterador()
+	if iter.Borrar() != 40 {
+		t.Error("Se esperaba borrar 40")
+	}
+	if !lista.EstaVacia() {
+		t.Error("Lista debe quedar vacía")
+	}
+
+}
+
+func TestIteradorCasosBorde(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	iter := lista.Iterador()
+	if iter.HaySiguiente() {
+		t.Error("En lista vacía no debería haber siguiente")
+	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Se esperaba pánico al borrar en lista vacía")
+		}
+	}()
+
+	iter.Borrar()
+
+	lista.InsertarUltimo(10)
+
+	iter = lista.Iterador()
+
+	if iter.Siguiente() != 10 {
+		t.Errorf("Se esperaba 10 como primer elemento")
+	}
+
+	iter.Borrar()
+
+	if !lista.EstaVacia() {
+		t.Error("Lista debe quedar vacía")
+	}
+
+	iter = lista.Iterador()
+
+	if iter.HaySiguiente() {
+		t.Error("Iterador no debe tener siguiente en lista vacía")
 	}
 }
