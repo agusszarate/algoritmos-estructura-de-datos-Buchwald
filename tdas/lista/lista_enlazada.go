@@ -1,5 +1,7 @@
 package lista
 
+//--------------------------------Lista Enlazada--------------------------------//
+
 type nodoLista[T any] struct {
 	dato      T
 	siguiente *nodoLista[T]
@@ -112,6 +114,8 @@ func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	}
 }
 
+//--------------------------------Iterador--------------------------------//
+
 type iteradorListaEnlazada[T any] struct {
 	lista    *listaEnlazada[T]
 	actual   *nodoLista[T]
@@ -153,6 +157,7 @@ func (iter *iteradorListaEnlazada[T]) Insertar(elemento T) {
 		iter.lista.ultimo = nuevo
 	}
 
+	iter.actual = nuevo
 	iter.lista.largo++
 }
 
