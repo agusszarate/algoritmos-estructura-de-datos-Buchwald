@@ -275,7 +275,9 @@ func TestIteradorCasosBorde(t *testing.T) {
 
 	iter = lista.Iterador()
 
-	if iter.Siguiente() != 10 {
+	iter.Siguiente()
+
+	if iter.VerActual() != 10 {
 		t.Errorf("Se esperaba 10 como primer elemento")
 	}
 
