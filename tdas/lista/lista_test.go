@@ -3,76 +3,45 @@ package lista_test
 import (
 	TDALista "tdas/lista"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	if !lista.EstaVacia() {
-		t.Error("Lista nueva debe estar vacía")
-	}
-
-	if lista.Largo() != 0 {
-		t.Error("Lista vacía debe tener largo 0")
-	}
+	require.True(t, lista.EstaVacia())
+	require.Equal(t, 0, lista.Largo())
 }
 
 func TestInsertarPrimero(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarPrimero(10)
-	if lista.EstaVacia() {
-		t.Error("Lista no debe estar vacía después de insertar")
-	}
-	if lista.Largo() != 1 {
-		t.Error("Lista debe tener largo 1")
-	}
-	if lista.VerPrimero() != 10 {
-		t.Error("Primer elemento debe ser 10")
-	}
-	if lista.VerUltimo() != 10 {
-		t.Error("Último elemento debe ser 10")
-	}
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 1, lista.Largo())
+	require.Equal(t, 10, lista.VerPrimero())
+	require.Equal(t, 10, lista.VerUltimo())
 
 	lista.InsertarPrimero(20)
-	if lista.Largo() != 2 {
-		t.Error("Lista debe tener largo 2")
-	}
-	if lista.VerPrimero() != 20 {
-		t.Error("Primer elemento debe ser 20")
-	}
-	if lista.VerUltimo() != 10 {
-		t.Error("Último elemento debe ser 10")
-	}
+	require.Equal(t, 2, lista.Largo())
+	require.Equal(t, 20, lista.VerPrimero())
+	require.Equal(t, 10, lista.VerUltimo())
 }
 
 func TestInsertarUltimo(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarUltimo(10)
-	if lista.EstaVacia() {
-		t.Error("Lista no debe estar vacía después de insertar")
-	}
-	if lista.Largo() != 1 {
-		t.Error("Lista debe tener largo 1")
-	}
-	if lista.VerPrimero() != 10 {
-		t.Error("Primer elemento debe ser 10")
-	}
-	if lista.VerUltimo() != 10 {
-		t.Error("Último elemento debe ser 10")
-	}
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 1, lista.Largo())
+	require.Equal(t, 10, lista.VerPrimero())
+	require.Equal(t, 10, lista.VerUltimo())
 
 	lista.InsertarUltimo(20)
-	if lista.Largo() != 2 {
-		t.Error("Lista debe tener largo 2")
-	}
-	if lista.VerPrimero() != 10 {
-		t.Error("Primer elemento debe ser 10")
-	}
-	if lista.VerUltimo() != 20 {
-		t.Error("Último elemento debe ser 20")
-	}
+	require.Equal(t, 2, lista.Largo())
+	require.Equal(t, 10, lista.VerPrimero())
+	require.Equal(t, 20, lista.VerUltimo())
 }
 
 func TestBorrarPrimero(t *testing.T) {
@@ -83,46 +52,26 @@ func TestBorrarPrimero(t *testing.T) {
 	lista.InsertarPrimero(30)
 
 	elemento := lista.BorrarPrimero()
-	if elemento != 30 {
-		t.Error("Elemento borrado debe ser 30")
-	}
-	if lista.Largo() != 2 {
-		t.Error("Lista debe tener largo 2")
-	}
-	if lista.VerPrimero() != 20 {
-		t.Error("Primer elemento debe ser 20")
-	}
+	require.Equal(t, 30, elemento)
+	require.Equal(t, 2, lista.Largo())
+	require.Equal(t, 20, lista.VerPrimero())
 
 	lista.BorrarPrimero()
 	lista.BorrarPrimero()
 
-	if !lista.EstaVacia() {
-		t.Error("Lista debe estar vacía")
-	}
+	require.True(t, lista.EstaVacia())
 }
 
 func TestPanicoListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("VerPrimero debe entrar en pánico con lista vacía")
-		}
-	}()
-
-	lista.VerPrimero()
+	require.Panics(t, func() { lista.VerPrimero() })
 }
 
 func TestPanicoBorrarListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("BorrarPrimero debe entrar en pánico con lista vacía")
-		}
-	}()
-
-	lista.BorrarPrimero()
+	require.Panics(t, func() { lista.BorrarPrimero() })
 }
 
 func TestIterador(t *testing.T) {
@@ -136,17 +85,13 @@ func TestIterador(t *testing.T) {
 	valor := 1
 
 	for iter.HaySiguiente() {
-		if iter.VerActual() != valor {
-			t.Errorf("Valor actual debe ser %d, pero es %d", valor, iter.VerActual())
-		}
+		require.Equal(t, valor, iter.VerActual())
 		iter.Siguiente()
 		contador++
 		valor++
 	}
 
-	if contador != 3 {
-		t.Error("Debe iterar 3 elementos")
-	}
+	require.Equal(t, 3, contador)
 }
 
 func TestIterar(t *testing.T) {
@@ -164,12 +109,8 @@ func TestIterar(t *testing.T) {
 		return true
 	})
 
-	if contador != 3 {
-		t.Error("Debe iterar 3 elementos")
-	}
-	if suma != 6 {
-		t.Error("Suma debe ser 6")
-	}
+	require.Equal(t, 3, contador)
+	require.Equal(t, 6, suma)
 }
 
 func TestIterarCorte(t *testing.T) {
@@ -185,9 +126,7 @@ func TestIterarCorte(t *testing.T) {
 		return elemento < 2
 	})
 
-	if contador != 2 {
-		t.Error("Debe iterar 2 elementos antes de cortar")
-	}
+	require.Equal(t, 2, contador)
 }
 
 func TestIteradorInsertar(t *testing.T) {
@@ -197,9 +136,7 @@ func TestIteradorInsertar(t *testing.T) {
 
 	iter := lista.Iterador()
 	iter.Insertar(10)
-	if lista.VerPrimero() != 10 {
-		t.Errorf("Primero debe ser 10 pero es %d", lista.VerPrimero())
-	}
+	require.Equal(t, 10, lista.VerPrimero())
 
 	iter = lista.Iterador()
 	iter.Siguiente()
@@ -211,9 +148,7 @@ func TestIteradorInsertar(t *testing.T) {
 		iter.Siguiente()
 	}
 	iter.Insertar(50)
-	if lista.VerUltimo() != 50 {
-		t.Errorf("Ultimo debe ser 50 pero es %d", lista.VerUltimo())
-	}
+	require.Equal(t, 50, lista.VerUltimo())
 
 	arr := []int{10, 20, 30, 40, 50}
 	valores := []int{}
@@ -222,9 +157,7 @@ func TestIteradorInsertar(t *testing.T) {
 		return true
 	})
 	for i := range arr {
-		if valores[i] != arr[i] {
-			t.Errorf("Se esperaba %d pero se obtuvo %d", arr[i], valores[i])
-		}
+		require.Equal(t, arr[i], valores[i])
 	}
 }
 
@@ -235,41 +168,23 @@ func TestIteradorBorrar(t *testing.T) {
 	}
 
 	iter := lista.Iterador()
-	if iter.Borrar() != 10 {
-		t.Error("Se esperaba borrar 10")
-	}
+	require.Equal(t, 10, iter.Borrar())
 
 	iter = lista.Iterador()
-	if iter.Borrar() != 20 {
-		t.Error("Se esperaba borrar 20")
-	}
-	if iter.Borrar() != 30 {
-		t.Error("Se esperaba borrar 30")
-	}
+	require.Equal(t, 20, iter.Borrar())
+	require.Equal(t, 30, iter.Borrar())
 
 	iter = lista.Iterador()
-	if iter.Borrar() != 40 {
-		t.Error("Se esperaba borrar 40")
-	}
-	if !lista.EstaVacia() {
-		t.Error("Lista debe quedar vacía")
-	}
-
+	require.Equal(t, 40, iter.Borrar())
+	require.True(t, lista.EstaVacia())
 }
 
 func TestIteradorCasosBorde(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	iter := lista.Iterador()
-	if iter.HaySiguiente() {
-		t.Error("En lista vacía no debería haber siguiente")
-	}
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Se esperaba pánico al borrar en lista vacía")
-		}
-	}()
+	require.False(t, iter.HaySiguiente())
 
-	iter.Borrar()
+	require.Panics(t, func() { iter.Borrar() })
 
 	lista.InsertarUltimo(10)
 
@@ -277,19 +192,13 @@ func TestIteradorCasosBorde(t *testing.T) {
 
 	iter.Siguiente()
 
-	if iter.VerActual() != 10 {
-		t.Errorf("Se esperaba 10 como primer elemento")
-	}
+	require.Equal(t, 10, iter.VerActual())
 
 	iter.Borrar()
 
-	if !lista.EstaVacia() {
-		t.Error("Lista debe quedar vacía")
-	}
+	require.True(t, lista.EstaVacia())
 
 	iter = lista.Iterador()
 
-	if iter.HaySiguiente() {
-		t.Error("Iterador no debe tener siguiente en lista vacía")
-	}
+	require.False(t, iter.HaySiguiente())
 }
