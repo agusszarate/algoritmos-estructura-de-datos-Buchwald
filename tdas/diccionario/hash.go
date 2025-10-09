@@ -5,13 +5,13 @@ import "fmt"
 type estadoCelda int
 
 const (
-	vacio estadoCelda = iota
-	ocupado
-	borrado
-	_TAMAÑO_HASH             = 11
-	_FACTOR_REDIMENSION      = 2
-	_FACTOR_CARGA_AGRANDAR   = 0.7
-	_FACTOR_CARGA_ACHICAR    = 0.3
+	_VACIO estadoCelda = iota
+	_OCUPADO
+	_BORRADO
+	_TAMAÑO_HASH           = 11
+	_FACTOR_REDIMENSION    = 2
+	_FACTOR_CARGA_AGRANDAR = 0.7
+	_FACTOR_CARGA_ACHICAR  = 0.3
 )
 
 type celdaHash[K any, V any] struct {
@@ -50,7 +50,7 @@ func (h *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 func (iter *iterHashCerrado[K, V]) avanzar() {
 	iter.pos++
 	for iter.pos < len(iter.hash.tabla) {
-		if iter.hash.tabla[iter.pos].estado == ocupado {
+		if iter.hash.tabla[iter.pos].estado == _OCUPADO {
 			return
 		}
 		iter.pos++
@@ -88,13 +88,19 @@ func (h *hashCerrado[K, V]) panicNoPertenece() {
 	panic("La clave no pertenece al diccionario")
 }
 
+// usamos fnv hashing como funcion de hash
 func (h *hashCerrado[K, V]) funcionHash(clave K) int {
+	const _FNVM uint64 = 1099511628211
+	const _FNVI uint64 = 14695981039346656037
 	bytes := convertirABytes(clave)
-	var hash uint
+	hash := _FNVI
+
 	for _, b := range bytes {
-		hash += uint(b)
+		hash *= _FNVM
+		hash ^= uint64(b)
 	}
-	return int(hash) % h.tam
+
+	return int(hash % uint64(h.tam))
 }
 
 func convertirABytes[K any](clave K) []byte {
@@ -122,18 +128,18 @@ func (h *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
 	for {
 		celda := &h.tabla[pos]
 
-		if celda.estado == vacio {
+		if celda.estado == _VACIO {
 			if primerBorrado != -1 {
 				return primerBorrado, false
 			}
 			return pos, false
 		}
 
-		if celda.estado == borrado {
+		if celda.estado == _BORRADO {
 			if primerBorrado == -1 {
 				primerBorrado = pos
 			}
-		} else if celda.estado == ocupado && h.igualdad(celda.clave, clave) {
+		} else if celda.estado == _OCUPADO && h.igualdad(celda.clave, clave) {
 			return pos, true
 		}
 
@@ -157,7 +163,7 @@ func (h *hashCerrado[K, V]) redimensionar(nuevoTam int) {
 	h.borrados = 0
 
 	for i := range len(tablaVieja) {
-		if tablaVieja[i].estado == ocupado {
+		if tablaVieja[i].estado == _OCUPADO {
 			h.Guardar(tablaVieja[i].clave, tablaVieja[i].dato)
 		}
 	}
@@ -175,13 +181,13 @@ func (h *hashCerrado[K, V]) Guardar(clave K, dato V) {
 		return
 	}
 
-	if h.tabla[pos].estado == borrado {
+	if h.tabla[pos].estado == _BORRADO {
 		h.borrados--
 	}
 	h.tabla[pos] = celdaHash[K, V]{
 		clave:  clave,
 		dato:   dato,
-		estado: ocupado,
+		estado: _OCUPADO,
 	}
 	h.cantidad++
 }
@@ -206,7 +212,7 @@ func (h *hashCerrado[K, V]) Borrar(clave K) V {
 	}
 
 	dato := h.tabla[pos].dato
-	h.tabla[pos].estado = borrado
+	h.tabla[pos].estado = _BORRADO
 	h.cantidad--
 	h.borrados++
 
@@ -223,7 +229,7 @@ func (h *hashCerrado[K, V]) Cantidad() int {
 
 func (h *hashCerrado[K, V]) Iterar(visitar func(clave K, dato V) bool) {
 	for i := range len(h.tabla) {
-		if h.tabla[i].estado == ocupado {
+		if h.tabla[i].estado == _OCUPADO {
 			if !visitar(h.tabla[i].clave, h.tabla[i].dato) {
 				return
 			}
