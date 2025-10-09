@@ -31,13 +31,7 @@ func (lista listaEnlazada[T]) EstaVacia() bool {
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(elemento T) {
-	var siguiente *nodoLista[T] = nil
-
-	if !lista.EstaVacia() {
-		siguiente = lista.primero
-	}
-
-	nodo := lista.crearNodo(elemento, siguiente)
+	nodo := lista.crearNodo(elemento, lista.primero)
 
 	if lista.EstaVacia() {
 		lista.ultimo = nodo

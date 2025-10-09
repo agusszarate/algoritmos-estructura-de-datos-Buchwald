@@ -190,8 +190,6 @@ func TestIteradorCasosBorde(t *testing.T) {
 
 	iter = lista.Iterador()
 
-	iter.Siguiente()
-
 	require.Equal(t, 10, iter.VerActual())
 
 	iter.Borrar()
