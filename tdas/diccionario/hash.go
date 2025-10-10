@@ -74,14 +74,18 @@ func (iter *iterHashCerrado[K, V]) Siguiente() {
 
 //-----------------------------------Hash-----------------------------------//
 
-func CrearHash[K any, V any](igualdad func(K, K) bool) Diccionario[K, V] {
+func crearTabla[K any, V any](tam int, igualdad func(K, K) bool) *hashCerrado[K, V] {
 	return &hashCerrado[K, V]{
-		tabla:    make([]celdaHash[K, V], _TAMAÑO_HASH),
+		tabla:    make([]celdaHash[K, V], tam),
 		cantidad: 0,
-		tam:      _TAMAÑO_HASH,
+		tam:      tam,
 		borrados: 0,
 		igualdad: igualdad,
 	}
+}
+
+func CrearHash[K any, V any](igualdad func(K, K) bool) Diccionario[K, V] {
+	return crearTabla[K, V](_TAMAÑO_HASH, igualdad)
 }
 
 func (h *hashCerrado[K, V]) panicNoPertenece() {
@@ -156,18 +160,17 @@ func (h *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
 
 func (h *hashCerrado[K, V]) redimensionar(nuevoTam int) {
 	tablaVieja := h.tabla
-	h.tabla = make([]celdaHash[K, V], nuevoTam)
-	h.tam = nuevoTam
-	cantidadVieja := h.cantidad
-	h.cantidad = 0
-	h.borrados = 0
+	nuevaTabla := crearTabla[K, V](nuevoTam, h.igualdad)
 
 	for i := range len(tablaVieja) {
 		if tablaVieja[i].estado == _OCUPADO {
-			h.Guardar(tablaVieja[i].clave, tablaVieja[i].dato)
+			nuevaTabla.Guardar(tablaVieja[i].clave, tablaVieja[i].dato)
 		}
 	}
-	h.cantidad = cantidadVieja
+
+	h.tabla = nuevaTabla.tabla
+	h.tam = nuevaTabla.tam
+	h.borrados = nuevaTabla.borrados
 }
 
 func (h *hashCerrado[K, V]) Guardar(clave K, dato V) {
