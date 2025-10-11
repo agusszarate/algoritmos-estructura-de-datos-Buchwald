@@ -12,6 +12,15 @@ func TestListaVacia(t *testing.T) {
 
 	require.True(t, lista.EstaVacia())
 	require.Equal(t, 0, lista.Largo())
+	require.Panics(t, func() {
+		lista.VerPrimero()
+	})
+	require.Panics(t, func() {
+		lista.VerUltimo()
+	})
+	require.Panics(t, func() {
+		lista.BorrarPrimero()
+	})
 }
 
 func TestInsertarPrimero(t *testing.T) {
@@ -62,19 +71,7 @@ func TestBorrarPrimero(t *testing.T) {
 	require.True(t, lista.EstaVacia())
 }
 
-func TestPanicoListaVacia(t *testing.T) {
-	lista := TDALista.CrearListaEnlazada[int]()
-
-	require.Panics(t, func() { lista.VerPrimero() })
-}
-
-func TestPanicoBorrarListaVacia(t *testing.T) {
-	lista := TDALista.CrearListaEnlazada[int]()
-
-	require.Panics(t, func() { lista.BorrarPrimero() })
-}
-
-func TestIterador(t *testing.T) {
+func TestIteradorconContador(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(1)
 	lista.InsertarUltimo(2)
@@ -94,7 +91,7 @@ func TestIterador(t *testing.T) {
 	require.Equal(t, 3, contador)
 }
 
-func TestIterar(t *testing.T) {
+func TestIterarconSuma(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(1)
 	lista.InsertarUltimo(2)
@@ -120,16 +117,23 @@ func TestIterarCorte(t *testing.T) {
 	lista.InsertarUltimo(3)
 
 	contador := 0
+	valores := []int{}
+	arr := []int{1, 2, 3}
 
 	lista.Iterar(func(elemento int) bool {
+		valores = append(valores, elemento)
 		contador++
 		return elemento < 2
 	})
 
+	for i := range valores {
+		require.Equal(t, arr[i], valores[i])
+	}
+
 	require.Equal(t, 2, contador)
 }
 
-func TestIteradorInsertar(t *testing.T) {
+func TestIteradorInsertarPrincipio(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarUltimo(20)
 	lista.InsertarUltimo(40)
@@ -137,20 +141,19 @@ func TestIteradorInsertar(t *testing.T) {
 	iter := lista.Iterador()
 	iter.Insertar(10)
 	require.Equal(t, 10, lista.VerPrimero())
+}
 
-	iter = lista.Iterador()
-	iter.Siguiente()
+func TestIteradorInsertarMitad(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(20)
+	lista.InsertarUltimo(40)
+	lista.InsertarUltimo(50)
+
+	iter := lista.Iterador()
 	iter.Siguiente()
 	iter.Insertar(30)
 
-	iter = lista.Iterador()
-	for iter.HaySiguiente() {
-		iter.Siguiente()
-	}
-	iter.Insertar(50)
-	require.Equal(t, 50, lista.VerUltimo())
-
-	arr := []int{10, 20, 30, 40, 50}
+	arr := []int{20, 30, 40, 50}
 	valores := []int{}
 	lista.Iterar(func(v int) bool {
 		valores = append(valores, v)
@@ -160,8 +163,19 @@ func TestIteradorInsertar(t *testing.T) {
 		require.Equal(t, arr[i], valores[i])
 	}
 }
+func TestIteradorInsertarFinal(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(10)
+	lista.InsertarUltimo(20)
+	iter := lista.Iterador()
+	for iter.HaySiguiente() {
+		iter.Siguiente()
+	}
+	iter.Insertar(50)
+	require.Equal(t, 50, lista.VerUltimo())
+}
 
-func TestIteradorBorrar(t *testing.T) {
+func TestIteradorBorrarHastaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	for _, v := range []int{10, 20, 30, 40} {
 		lista.InsertarUltimo(v)
@@ -177,6 +191,65 @@ func TestIteradorBorrar(t *testing.T) {
 	iter = lista.Iterador()
 	require.Equal(t, 40, iter.Borrar())
 	require.True(t, lista.EstaVacia())
+}
+
+func TestIteradorBorrarPrincipio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(10)
+	lista.InsertarUltimo(20)
+	lista.InsertarUltimo(30)
+
+	iter := lista.Iterador()
+	borrado := iter.Borrar()
+
+	require.Equal(t, 10, borrado)
+	require.Equal(t, 20, lista.VerPrimero())
+	require.Equal(t, 2, lista.Largo())
+}
+
+func TestIteradorBorrarMitad(t *testing.T) {
+
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(10)
+	lista.InsertarUltimo(20)
+	lista.InsertarUltimo(30)
+	lista.InsertarUltimo(40)
+
+	iter := lista.Iterador()
+	iter.Siguiente()
+	iter.Siguiente()
+	borrado := iter.Borrar()
+
+	require.Equal(t, 30, borrado)
+	require.Equal(t, 3, lista.Largo())
+	require.Equal(t, 40, lista.VerUltimo())
+
+	arr := []int{10, 20, 40}
+	valores := []int{}
+	lista.Iterar(func(v int) bool {
+		valores = append(valores, v)
+		return true
+	})
+	for i := range arr {
+		require.Equal(t, arr[i], valores[i])
+	}
+}
+
+func TestIteradorBorrarFinal(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarUltimo(10)
+	lista.InsertarUltimo(20)
+	lista.InsertarUltimo(30)
+
+	iter := lista.Iterador()
+	iter.Siguiente()
+	iter.Siguiente()
+	borrado := iter.Borrar()
+
+	require.Equal(t, 30, borrado)
+	require.Equal(t, 2, lista.Largo())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 20, lista.VerUltimo())
 }
 
 func TestIteradorCasosBorde(t *testing.T) {
