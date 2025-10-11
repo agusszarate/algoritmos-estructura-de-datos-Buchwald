@@ -11,7 +11,7 @@ const (
 	_TAMAÑO_HASH           = 11
 	_FACTOR_REDIMENSION    = 2
 	_FACTOR_CARGA_AGRANDAR = 0.7
-	_FACTOR_CARGA_ACHICAR  = 0.3
+	_FACTOR_CARGA_ACHICAR  = 0.2
 )
 
 type celdaHash[K any, V any] struct {
@@ -41,8 +41,8 @@ func (iter *iterHashCerrado[K, V]) panicFin() {
 	}
 }
 
-func (h *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
-	iter := &iterHashCerrado[K, V]{hash: h, pos: -1}
+func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
+	iter := &iterHashCerrado[K, V]{hash: hash, pos: -1}
 	iter.avanzar()
 	return iter
 }
@@ -88,49 +88,49 @@ func CrearHash[K any, V any](igualdad func(K, K) bool) Diccionario[K, V] {
 	return crearTabla[K, V](_TAMAÑO_HASH, igualdad)
 }
 
-func (h *hashCerrado[K, V]) panicNoPertenece() {
+func (hash *hashCerrado[K, V]) panicNoPertenece() {
 	panic("La clave no pertenece al diccionario")
 }
 
 // usamos fnv hashing como funcion de hash
-func (h *hashCerrado[K, V]) funcionHash(clave K) int {
+func (hash *hashCerrado[K, V]) funcionHash(clave K) int {
 	const _FNVM uint64 = 1099511628211
 	const _FNVI uint64 = 14695981039346656037
 	bytes := convertirABytes(clave)
-	hash := _FNVI
+	hashValue := _FNVI
 
 	for _, b := range bytes {
-		hash *= _FNVM
-		hash ^= uint64(b)
+		hashValue *= _FNVM
+		hashValue ^= uint64(b)
 	}
 
-	return int(hash % uint64(h.tam))
+	return int(hashValue % uint64(hash.tam))
 }
 
 func convertirABytes[K any](clave K) []byte {
 	return []byte(fmt.Sprintf("%v", clave))
 }
 
-func (h *hashCerrado[K, V]) calcularFactorCarga() float64 {
-	return float64(h.cantidad+h.borrados) / float64(h.tam)
+func (hash *hashCerrado[K, V]) calcularFactorCarga() float64 {
+	return float64(hash.cantidad+hash.borrados) / float64(hash.tam)
 }
 
-func (h *hashCerrado[K, V]) debeAgrandar() bool {
-	return h.calcularFactorCarga() >= _FACTOR_CARGA_AGRANDAR
+func (hash *hashCerrado[K, V]) debeAgrandar() bool {
+	return hash.calcularFactorCarga() >= _FACTOR_CARGA_AGRANDAR
 }
 
-func (h *hashCerrado[K, V]) debeAchicar() bool {
-	factorCarga := float64(h.cantidad) / float64(h.tam)
-	return h.tam > _TAMAÑO_HASH && factorCarga <= _FACTOR_CARGA_ACHICAR
+func (hash *hashCerrado[K, V]) debeAchicar() bool {
+	factorCarga := float64(hash.cantidad) / float64(hash.tam)
+	return hash.tam > _TAMAÑO_HASH && factorCarga <= _FACTOR_CARGA_ACHICAR
 }
 
-func (h *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
-	pos := h.funcionHash(clave)
+func (hash *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
+	pos := hash.funcionHash(clave)
 	inicio := pos
 	primerBorrado := -1
 
 	for {
-		celda := &h.tabla[pos]
+		celda := &hash.tabla[pos]
 
 		if celda.estado == _VACIO {
 			if primerBorrado != -1 {
@@ -143,11 +143,11 @@ func (h *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
 			if primerBorrado == -1 {
 				primerBorrado = pos
 			}
-		} else if celda.estado == _OCUPADO && h.igualdad(celda.clave, clave) {
+		} else if celda.estado == _OCUPADO && hash.igualdad(celda.clave, clave) {
 			return pos, true
 		}
 
-		pos = (pos + 1) % h.tam
+		pos = (pos + 1) % hash.tam
 		if pos == inicio {
 			if primerBorrado != -1 {
 				return primerBorrado, false
@@ -158,9 +158,9 @@ func (h *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
 	return -1, false
 }
 
-func (h *hashCerrado[K, V]) redimensionar(nuevoTam int) {
-	tablaVieja := h.tabla
-	nuevaTabla := crearTabla[K, V](nuevoTam, h.igualdad)
+func (hash *hashCerrado[K, V]) redimensionar(nuevoTam int) {
+	tablaVieja := hash.tabla
+	nuevaTabla := crearTabla[K, V](nuevoTam, hash.igualdad)
 
 	for i := range len(tablaVieja) {
 		if tablaVieja[i].estado == _OCUPADO {
@@ -168,72 +168,72 @@ func (h *hashCerrado[K, V]) redimensionar(nuevoTam int) {
 		}
 	}
 
-	h.tabla = nuevaTabla.tabla
-	h.tam = nuevaTabla.tam
-	h.borrados = nuevaTabla.borrados
+	hash.tabla = nuevaTabla.tabla
+	hash.tam = nuevaTabla.tam
+	hash.borrados = nuevaTabla.borrados
 }
 
-func (h *hashCerrado[K, V]) Guardar(clave K, dato V) {
-	if h.debeAgrandar() {
-		h.redimensionar(h.tam * _FACTOR_REDIMENSION)
+func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
+	if hash.debeAgrandar() {
+		hash.redimensionar(hash.tam * _FACTOR_REDIMENSION)
 	}
 
-	pos, existe := h.buscarPosicion(clave)
+	pos, existe := hash.buscarPosicion(clave)
 	if existe {
-		h.tabla[pos].dato = dato
+		hash.tabla[pos].dato = dato
 		return
 	}
 
-	if h.tabla[pos].estado == _BORRADO {
-		h.borrados--
+	if hash.tabla[pos].estado == _BORRADO {
+		hash.borrados--
 	}
-	h.tabla[pos] = celdaHash[K, V]{
+	hash.tabla[pos] = celdaHash[K, V]{
 		clave:  clave,
 		dato:   dato,
 		estado: _OCUPADO,
 	}
-	h.cantidad++
+	hash.cantidad++
 }
 
-func (h *hashCerrado[K, V]) Pertenece(clave K) bool {
-	_, existe := h.buscarPosicion(clave)
+func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
+	_, existe := hash.buscarPosicion(clave)
 	return existe
 }
 
-func (h *hashCerrado[K, V]) Obtener(clave K) V {
-	pos, existe := h.buscarPosicion(clave)
+func (hash *hashCerrado[K, V]) Obtener(clave K) V {
+	pos, existe := hash.buscarPosicion(clave)
 	if !existe {
-		h.panicNoPertenece()
+		hash.panicNoPertenece()
 	}
-	return h.tabla[pos].dato
+	return hash.tabla[pos].dato
 }
 
-func (h *hashCerrado[K, V]) Borrar(clave K) V {
-	pos, existe := h.buscarPosicion(clave)
+func (hash *hashCerrado[K, V]) Borrar(clave K) V {
+	pos, existe := hash.buscarPosicion(clave)
 	if !existe {
-		h.panicNoPertenece()
+		hash.panicNoPertenece()
 	}
 
-	dato := h.tabla[pos].dato
-	h.tabla[pos].estado = _BORRADO
-	h.cantidad--
-	h.borrados++
+	dato := hash.tabla[pos].dato
+	hash.tabla[pos].estado = _BORRADO
+	hash.cantidad--
+	hash.borrados++
 
-	if h.debeAchicar() {
-		h.redimensionar(h.tam / _FACTOR_REDIMENSION)
+	if hash.debeAchicar() {
+		hash.redimensionar(hash.tam / _FACTOR_REDIMENSION)
 	}
 
 	return dato
 }
 
-func (h *hashCerrado[K, V]) Cantidad() int {
-	return h.cantidad
+func (hash *hashCerrado[K, V]) Cantidad() int {
+	return hash.cantidad
 }
 
-func (h *hashCerrado[K, V]) Iterar(visitar func(clave K, dato V) bool) {
-	for i := range len(h.tabla) {
-		if h.tabla[i].estado == _OCUPADO {
-			if !visitar(h.tabla[i].clave, h.tabla[i].dato) {
+func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, dato V) bool) {
+	for i := range len(hash.tabla) {
+		if hash.tabla[i].estado == _OCUPADO {
+			if !visitar(hash.tabla[i].clave, hash.tabla[i].dato) {
 				return
 			}
 		}

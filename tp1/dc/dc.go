@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -13,12 +12,14 @@ import (
 const _MENSAJE_ERROR = "ERROR"
 
 type calculadoraRPN struct {
-	pila pila.Pila[int64]
+	pila        pila.Pila[int64]
+	operaciones map[string]operacion
 }
 
 func CrearCalculadoraRPN() *calculadoraRPN {
 	return &calculadoraRPN{
-		pila: pila.CrearPilaDinamica[int64](),
+		pila:        pila.CrearPilaDinamica[int64](),
+		operaciones: crearOperaciones(),
 	}
 }
 
@@ -31,8 +32,7 @@ func (calc *calculadoraRPN) EvaluarExpresion(linea string) string {
 	}
 
 	for _, token := range tokens {
-		err := calc.procesarToken(token)
-		if err != "" {
+		if err := calc.procesarToken(token); err != "" {
 			calc.vaciarPila()
 			return _MENSAJE_ERROR
 		}
@@ -69,76 +69,21 @@ func (calc *calculadoraRPN) procesarToken(token string) string {
 	return calc.procesarOperador(token)
 }
 
-func (calc *calculadoraRPN) procesarOperador(operador string) string {
-	switch operador {
-	case "+":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			return ops[0] + ops[1], ""
-		})
-	case "-":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			return ops[0] - ops[1], ""
-		})
-	case "*":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			return ops[0] * ops[1], ""
-		})
-	case "/":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			if ops[1] == 0 {
-				return 0, "division por cero"
-			}
-			return ops[0] / ops[1], ""
-		})
-	case "^":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			if ops[1] < 0 {
-				return 0, "exponente negativo"
-			}
-			resultado := int64(math.Pow(float64(ops[0]), float64(ops[1])))
-			return resultado, ""
-		})
-	case "log":
-		return calc.ejecutarOperacion(2, func(ops []int64) (int64, string) {
-			if ops[1] < 2 {
-				return 0, "base invalida"
-			}
-			if ops[0] <= 0 {
-				return 0, "argumento invalido"
-			}
-			resultado := int64(math.Log(float64(ops[0])) / math.Log(float64(ops[1])))
-			return resultado, ""
-		})
-	case "sqrt":
-		return calc.ejecutarOperacion(1, func(ops []int64) (int64, string) {
-			if ops[0] < 0 {
-				return 0, "raiz negativa"
-			}
-			resultado := int64(math.Sqrt(float64(ops[0])))
-			return resultado, ""
-		})
-	case "?":
-		return calc.ejecutarOperacion(3, func(ops []int64) (int64, string) {
-			if ops[0] != 0 {
-				return ops[1], ""
-			}
-			return ops[2], ""
-		})
-	default:
+func (calc *calculadoraRPN) procesarOperador(simbolo string) string {
+	op, existe := calc.operaciones[simbolo]
+	if !existe {
 		return "operador invalido"
 	}
-}
 
-func (calc *calculadoraRPN) ejecutarOperacion(numOperandos int, operacion func([]int64) (int64, string)) string {
-	operandos := make([]int64, numOperandos)
-	for i := 0; i < numOperandos; i++ {
+	operandos := make([]int64, op.aridad)
+	for i := 0; i < op.aridad; i++ {
 		if calc.pila.EstaVacia() {
 			return "faltan operandos"
 		}
-		operandos[numOperandos-1-i] = calc.pila.Desapilar()
+		operandos[op.aridad-1-i] = calc.pila.Desapilar()
 	}
 
-	resultado, err := operacion(operandos)
+	resultado, err := op.operar(operandos)
 	if err != "" {
 		return err
 	}
