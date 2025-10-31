@@ -28,14 +28,14 @@ func swap[T any](arr []T, i, j int) {
 	arr[i], arr[j] = arr[j], arr[i]
 }
 
-func (h *heap[T]) upheap(pos int) {
+func (heap *heap[T]) upheap(pos int) {
 	if pos == 0 {
 		return
 	}
 	posPadre := calcularPosicionPadre(pos)
-	if h.cmp(h.datos[pos], h.datos[posPadre]) > 0 {
-		swap(h.datos, pos, posPadre)
-		h.upheap(posPadre)
+	if heap.cmp(heap.datos[pos], heap.datos[posPadre]) > 0 {
+		swap(heap.datos, pos, posPadre)
+		heap.upheap(posPadre)
 	}
 }
 
@@ -58,14 +58,14 @@ func downheapGenerico[T any](arr []T, pos, tam int, cmp func(T, T) int) {
 	}
 }
 
-func (h *heap[T]) downheap(pos int) {
-	downheapGenerico(h.datos, pos, h.cantidad, h.cmp)
+func (heap *heap[T]) downheap(pos int) {
+	downheapGenerico(heap.datos, pos, heap.cantidad, heap.cmp)
 }
 
-func (h *heap[T]) redimensionar(nuevaCapacidad int) {
+func (heap *heap[T]) redimensionar(nuevaCapacidad int) {
 	nuevosDatos := make([]T, nuevaCapacidad)
-	copy(nuevosDatos, h.datos[:h.cantidad])
-	h.datos = nuevosDatos
+	copy(nuevosDatos, heap.datos[:heap.cantidad])
+	heap.datos = nuevosDatos
 }
 
 func heapify[T any](arr []T, cmp func(T, T) int) {
@@ -75,44 +75,44 @@ func heapify[T any](arr []T, cmp func(T, T) int) {
 	}
 }
 
-func (h *heap[T]) EstaVacia() bool {
-	return h.cantidad == 0
+func (heap *heap[T]) EstaVacia() bool {
+	return heap.cantidad == 0
 }
 
-func (h *heap[T]) Encolar(elem T) {
-	if h.cantidad == len(h.datos) {
-		h.redimensionar(len(h.datos) * _FACTOR_REDIMENSION)
+func (heap *heap[T]) Encolar(elem T) {
+	if heap.cantidad == len(heap.datos) {
+		heap.redimensionar(len(heap.datos) * _FACTOR_REDIMENSION)
 	}
-	h.datos[h.cantidad] = elem
-	h.upheap(h.cantidad)
-	h.cantidad++
+	heap.datos[heap.cantidad] = elem
+	heap.upheap(heap.cantidad)
+	heap.cantidad++
 }
 
-func (h *heap[T]) VerMax() T {
-	if h.EstaVacia() {
+func (heap *heap[T]) VerMax() T {
+	if heap.EstaVacia() {
 		panic("La cola esta vacia")
 	}
-	return h.datos[0]
+	return heap.datos[0]
 }
 
-func (h *heap[T]) Desencolar() T {
-	if h.EstaVacia() {
+func (heap *heap[T]) Desencolar() T {
+	if heap.EstaVacia() {
 		panic("La cola esta vacia")
 	}
-	max := h.datos[0]
-	h.cantidad--
-	h.datos[0] = h.datos[h.cantidad]
-	h.downheap(0)
+	max := heap.datos[0]
+	heap.cantidad--
+	heap.datos[0] = heap.datos[heap.cantidad]
+	heap.downheap(0)
 
-	if h.cantidad > 0 && h.cantidad*_FACTOR_REDUCCION <= len(h.datos) && len(h.datos) > _CAPACIDAD_INICIAL {
-		h.redimensionar(len(h.datos) / _FACTOR_REDIMENSION)
+	if heap.cantidad > 0 && heap.cantidad*_FACTOR_REDUCCION <= len(heap.datos) && len(heap.datos) > _CAPACIDAD_INICIAL {
+		heap.redimensionar(len(heap.datos) / _FACTOR_REDIMENSION)
 	}
 
 	return max
 }
 
-func (h *heap[T]) Cantidad() int {
-	return h.cantidad
+func (heap *heap[T]) Cantidad() int {
+	return heap.cantidad
 }
 
 func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
