@@ -1,5 +1,7 @@
 package diccionario
 
+import TDAPila "tdas/pila"
+
 type nodoAbb[K any, V any] struct {
 	izquierdo *nodoAbb[K, V]
 	derecho   *nodoAbb[K, V]
@@ -14,7 +16,7 @@ type abb[K any, V any] struct {
 }
 
 type iterAbb[K any, V any] struct {
-	pila  []*nodoAbb[K, V]
+	pila  TDAPila.Pila[*nodoAbb[K, V]]
 	desde *K
 	hasta *K
 	cmp   func(K, K) int
@@ -36,17 +38,13 @@ func (arbol *abb[K, V]) buscarNodo(nodo *nodoAbb[K, V], clave K) *nodoAbb[K, V] 
 	if nodo == nil {
 		return nil
 	}
-
 	comparacion := arbol.cmp(clave, nodo.clave)
-
 	if comparacion == 0 {
 		return nodo
 	}
-
 	if comparacion < 0 {
 		return arbol.buscarNodo(nodo.izquierdo, clave)
 	}
-
 	return arbol.buscarNodo(nodo.derecho, clave)
 }
 
@@ -56,101 +54,90 @@ func (arbol *abb[K, V]) Pertenece(clave K) bool {
 
 func (arbol *abb[K, V]) Obtener(clave K) V {
 	nodo := arbol.buscarNodo(arbol.raiz, clave)
-
 	if nodo == nil {
 		arbol.panicNoPertenece()
 	}
-
 	return nodo.dato
 }
 
-func (arbol *abb[K, V]) insertarNodo(nodo **nodoAbb[K, V], clave K, dato V) {
-	*nodo = arbol.crearNodo(clave, dato)
-	arbol.cantidad++
+func (arbol *abb[K, V]) guardarNodo(nodo *nodoAbb[K, V], clave K, dato V) (*nodoAbb[K, V], bool) {
+	if nodo == nil {
+		return arbol.crearNodo(clave, dato), true
+	}
+	comparacion := arbol.cmp(clave, nodo.clave)
+	if comparacion == 0 {
+		nodo.dato = dato
+		return nodo, false
+	}
+	if comparacion < 0 {
+		nuevoIzquierdo, esNuevo := arbol.guardarNodo(nodo.izquierdo, clave, dato)
+		nodo.izquierdo = nuevoIzquierdo
+		return nodo, esNuevo
+	}
+	nuevoDerecho, esNuevo := arbol.guardarNodo(nodo.derecho, clave, dato)
+	nodo.derecho = nuevoDerecho
+	return nodo, esNuevo
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, dato V) {
-	if arbol.raiz == nil {
-		arbol.insertarNodo(&arbol.raiz, clave, dato)
-		return
+	nuevoNodo, esNuevo := arbol.guardarNodo(arbol.raiz, clave, dato)
+	arbol.raiz = nuevoNodo
+	if esNuevo {
+		arbol.cantidad++
 	}
-	arbol.guardarNodo(arbol.raiz, clave, dato)
-}
-
-func (arbol *abb[K, V]) guardarNodo(nodo *nodoAbb[K, V], clave K, dato V) {
-	comparacion := arbol.cmp(clave, nodo.clave)
-
-	if comparacion == 0 {
-		nodo.dato = dato
-		return
-	}
-
-	var hijo **nodoAbb[K, V]
-	if comparacion < 0 {
-		hijo = &nodo.izquierdo
-	} else {
-		hijo = &nodo.derecho
-	}
-
-	if *hijo == nil {
-		arbol.insertarNodo(hijo, clave, dato)
-		return
-	}
-
-	arbol.guardarNodo(*hijo, clave, dato)
 }
 
 func buscarReemplazante[K any, V any](nodo *nodoAbb[K, V]) *nodoAbb[K, V] {
-
 	if nodo.izquierdo == nil {
 		return nodo
 	}
-
 	return buscarReemplazante(nodo.izquierdo)
 }
 
-func (arbol *abb[K, V]) borrarNodo(nodo *nodoAbb[K, V], clave K) (*nodoAbb[K, V], V) {
+func (arbol *abb[K, V]) borrarNodo(nodo *nodoAbb[K, V], clave K) (*nodoAbb[K, V], bool) {
 	if nodo == nil {
-		arbol.panicNoPertenece()
+		return nil, false
 	}
 
 	comparacion := arbol.cmp(clave, nodo.clave)
-
-	if comparacion != 0 {
-		if comparacion < 0 {
-			nuevoIzq, dato := arbol.borrarNodo(nodo.izquierdo, clave)
-			nodo.izquierdo = nuevoIzq
-			return nodo, dato
-		}
-		nuevoDer, dato := arbol.borrarNodo(nodo.derecho, clave)
-		nodo.derecho = nuevoDer
-		return nodo, dato
+	if comparacion < 0 {
+		nuevoIzquierdo, encontrado := arbol.borrarNodo(nodo.izquierdo, clave)
+		nodo.izquierdo = nuevoIzquierdo
+		return nodo, encontrado
+	}
+	if comparacion > 0 {
+		nuevoDerecho, encontrado := arbol.borrarNodo(nodo.derecho, clave)
+		nodo.derecho = nuevoDerecho
+		return nodo, encontrado
 	}
 
-	dato := nodo.dato
-
 	if nodo.izquierdo == nil && nodo.derecho == nil {
-		return nil, dato
+		return nil, true
 	}
 
 	if nodo.izquierdo == nil {
-		return nodo.derecho, dato
+		return nodo.derecho, true
 	}
-
 	if nodo.derecho == nil {
-		return nodo.izquierdo, dato
+		return nodo.izquierdo, true
 	}
 
 	reemplazante := buscarReemplazante(nodo.derecho)
 	nodo.clave = reemplazante.clave
 	nodo.dato = reemplazante.dato
-	nodo.derecho, _ = arbol.borrarNodo(nodo.derecho, reemplazante.clave)
-	return nodo, dato
+	nuevoDerecho, _ := arbol.borrarNodo(nodo.derecho, reemplazante.clave)
+	nodo.derecho = nuevoDerecho
+	return nodo, true
 }
 
 func (arbol *abb[K, V]) Borrar(clave K) V {
-	nuevoRaiz, dato := arbol.borrarNodo(arbol.raiz, clave)
-	arbol.raiz = nuevoRaiz
+	nodo := arbol.buscarNodo(arbol.raiz, clave)
+	if nodo == nil {
+		arbol.panicNoPertenece()
+	}
+	dato := nodo.dato
+	nuevoNodo, _ := arbol.borrarNodo(arbol.raiz, clave)
+	arbol.raiz = nuevoNodo
 	arbol.cantidad--
 	return dato
 }
@@ -218,7 +205,7 @@ func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, da
 
 func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
 	iter := &iterAbb[K, V]{
-		pila:  make([]*nodoAbb[K, V], 0),
+		pila:  TDAPila.CrearPilaDinamica[*nodoAbb[K, V]](),
 		desde: desde,
 		hasta: hasta,
 		cmp:   arbol.cmp,
@@ -237,7 +224,7 @@ func (iter *iterAbb[K, V]) apilarIzquierdos(nodo *nodoAbb[K, V]) {
 			nodo = nodo.izquierdo
 			continue
 		}
-		iter.pila = append(iter.pila, nodo)
+		iter.pila.Apilar(nodo)
 		nodo = nodo.izquierdo
 	}
 }
@@ -249,18 +236,17 @@ func (iter *iterAbb[K, V]) panicFin() {
 }
 
 func (iter *iterAbb[K, V]) HaySiguiente() bool {
-	return len(iter.pila) > 0
+	return !iter.pila.EstaVacia()
 }
 
 func (iter *iterAbb[K, V]) VerActual() (K, V) {
 	iter.panicFin()
-	nodoActual := iter.pila[len(iter.pila)-1]
+	nodoActual := iter.pila.VerTope()
 	return nodoActual.clave, nodoActual.dato
 }
 
 func (iter *iterAbb[K, V]) Siguiente() {
 	iter.panicFin()
-	nodoActual := iter.pila[len(iter.pila)-1]
-	iter.pila = iter.pila[:len(iter.pila)-1]
+	nodoActual := iter.pila.Desapilar()
 	iter.apilarIzquierdos(nodoActual.derecho)
 }
