@@ -24,7 +24,6 @@ func crearUsuario(nombre string, posicion int) *Usuario {
 type AlgoGram struct {
 	usuarios        diccionario.Diccionario[string, *Usuario]
 	usuarioLoggeado *Usuario
-	listaUsuarios   []*Usuario
 }
 
 func crearAlgoGram() *AlgoGram {
@@ -32,7 +31,6 @@ func crearAlgoGram() *AlgoGram {
 	return &AlgoGram{
 		usuarios:        diccionario.CrearHash[string, *Usuario](igualdadString),
 		usuarioLoggeado: nil,
-		listaUsuarios:   make([]*Usuario, 0),
 	}
 }
 
@@ -52,7 +50,6 @@ func (ag *AlgoGram) cargarUsuarios(archivo string) error {
 		}
 		usuario := crearUsuario(nombre, posicion)
 		ag.usuarios.Guardar(nombre, usuario)
-		ag.listaUsuarios = append(ag.listaUsuarios, usuario)
 		posicion++
 	}
 
