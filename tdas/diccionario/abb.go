@@ -34,111 +34,98 @@ func (arbol *abb[K, V]) crearNodo(clave K, dato V) *nodoAbb[K, V] {
 	return &nodoAbb[K, V]{izquierdo: nil, derecho: nil, clave: clave, dato: dato}
 }
 
-func (arbol *abb[K, V]) buscarNodo(nodo *nodoAbb[K, V], clave K) *nodoAbb[K, V] {
-	if nodo == nil {
-		return nil
+func (arbol *abb[K, V]) buscarNodoConPadre(clave K) (*nodoAbb[K, V], *nodoAbb[K, V]) {
+	var padre *nodoAbb[K, V] = nil
+	actual := arbol.raiz
+	for actual != nil {
+		cmp := arbol.cmp(clave, actual.clave)
+		if cmp == 0 {
+			return actual, padre
+		}
+		padre = actual
+		if cmp < 0 {
+			actual = actual.izquierdo
+		} else {
+			actual = actual.derecho
+		}
 	}
-	comparacion := arbol.cmp(clave, nodo.clave)
-	if comparacion == 0 {
-		return nodo
-	}
-	if comparacion < 0 {
-		return arbol.buscarNodo(nodo.izquierdo, clave)
-	}
-	return arbol.buscarNodo(nodo.derecho, clave)
+	return nil, padre
 }
 
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
-	return arbol.buscarNodo(arbol.raiz, clave) != nil
+	nodo, _ := arbol.buscarNodoConPadre(clave)
+	return nodo != nil
 }
 
 func (arbol *abb[K, V]) Obtener(clave K) V {
-	nodo := arbol.buscarNodo(arbol.raiz, clave)
+	nodo, _ := arbol.buscarNodoConPadre(clave)
 	if nodo == nil {
 		arbol.panicNoPertenece()
 	}
 	return nodo.dato
 }
 
-func (arbol *abb[K, V]) guardarNodo(nodo *nodoAbb[K, V], clave K, dato V) (*nodoAbb[K, V], bool) {
-	if nodo == nil {
-		return arbol.crearNodo(clave, dato), true
-	}
-	comparacion := arbol.cmp(clave, nodo.clave)
-	if comparacion == 0 {
-		nodo.dato = dato
-		return nodo, false
-	}
-	if comparacion < 0 {
-		nuevoIzquierdo, esNuevo := arbol.guardarNodo(nodo.izquierdo, clave, dato)
-		nodo.izquierdo = nuevoIzquierdo
-		return nodo, esNuevo
-	}
-	nuevoDerecho, esNuevo := arbol.guardarNodo(nodo.derecho, clave, dato)
-	nodo.derecho = nuevoDerecho
-	return nodo, esNuevo
-}
-
 func (arbol *abb[K, V]) Guardar(clave K, dato V) {
-	nuevoNodo, esNuevo := arbol.guardarNodo(arbol.raiz, clave, dato)
-	arbol.raiz = nuevoNodo
-	if esNuevo {
-		arbol.cantidad++
-	}
-}
+	nodo, padre := arbol.buscarNodoConPadre(clave)
 
-func buscarReemplazante[K any, V any](nodo *nodoAbb[K, V]) *nodoAbb[K, V] {
-	if nodo.izquierdo == nil {
-		return nodo
-	}
-	return buscarReemplazante(nodo.izquierdo)
-}
-
-func (arbol *abb[K, V]) borrarNodo(nodo *nodoAbb[K, V], clave K) (*nodoAbb[K, V], bool) {
-	if nodo == nil {
-		return nil, false
+	if nodo != nil {
+		nodo.dato = dato
+		return
 	}
 
-	comparacion := arbol.cmp(clave, nodo.clave)
-	if comparacion < 0 {
-		nuevoIzquierdo, encontrado := arbol.borrarNodo(nodo.izquierdo, clave)
-		nodo.izquierdo = nuevoIzquierdo
-		return nodo, encontrado
-	}
-	if comparacion > 0 {
-		nuevoDerecho, encontrado := arbol.borrarNodo(nodo.derecho, clave)
-		nodo.derecho = nuevoDerecho
-		return nodo, encontrado
+	nuevo := arbol.crearNodo(clave, dato)
+	arbol.cantidad++
+
+	if padre == nil {
+		arbol.raiz = nuevo
+		return
 	}
 
-	if nodo.izquierdo == nil && nodo.derecho == nil {
-		return nil, true
+	if arbol.cmp(clave, padre.clave) < 0 {
+		padre.izquierdo = nuevo
+	} else {
+		padre.derecho = nuevo
 	}
-
-	if nodo.izquierdo == nil {
-		return nodo.derecho, true
-	}
-	if nodo.derecho == nil {
-		return nodo.izquierdo, true
-	}
-
-	reemplazante := buscarReemplazante(nodo.derecho)
-	nodo.clave = reemplazante.clave
-	nodo.dato = reemplazante.dato
-	nuevoDerecho, _ := arbol.borrarNodo(nodo.derecho, reemplazante.clave)
-	nodo.derecho = nuevoDerecho
-	return nodo, true
 }
 
 func (arbol *abb[K, V]) Borrar(clave K) V {
-	nodo := arbol.buscarNodo(arbol.raiz, clave)
+	nodo, padre := arbol.buscarNodoConPadre(clave)
 	if nodo == nil {
 		arbol.panicNoPertenece()
 	}
 	dato := nodo.dato
-	nuevoNodo, _ := arbol.borrarNodo(arbol.raiz, clave)
-	arbol.raiz = nuevoNodo
 	arbol.cantidad--
+
+	if nodo.izquierdo != nil && nodo.derecho != nil {
+		reemplazo := nodo.derecho
+		padreReemplazo := nodo
+		for reemplazo.izquierdo != nil {
+			padreReemplazo = reemplazo
+			reemplazo = reemplazo.izquierdo
+		}
+
+		nodo.clave = reemplazo.clave
+		nodo.dato = reemplazo.dato
+
+		nodo = reemplazo
+		padre = padreReemplazo
+	}
+
+	var hijo *nodoAbb[K, V]
+	if nodo.izquierdo != nil {
+		hijo = nodo.izquierdo
+	} else {
+		hijo = nodo.derecho
+	}
+
+	if padre == nil {
+		arbol.raiz = hijo
+	} else if padre.izquierdo == nodo {
+		padre.izquierdo = hijo
+	} else {
+		padre.derecho = hijo
+	}
+
 	return dato
 }
 
@@ -146,21 +133,8 @@ func (arbol *abb[K, V]) Cantidad() int {
 	return arbol.cantidad
 }
 
-func iterarInOrder[K any, V any](nodo *nodoAbb[K, V], visitar func(clave K, dato V) bool) bool {
-	if nodo == nil {
-		return true
-	}
-	if !iterarInOrder(nodo.izquierdo, visitar) {
-		return false
-	}
-	if !visitar(nodo.clave, nodo.dato) {
-		return false
-	}
-	return iterarInOrder(nodo.derecho, visitar)
-}
-
 func (arbol *abb[K, V]) Iterar(visitar func(clave K, dato V) bool) {
-	iterarInOrder(arbol.raiz, visitar)
+	arbol.IterarRango(nil, nil, visitar)
 }
 
 func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
@@ -184,15 +158,7 @@ func iterarRango[K any, V any](nodo *nodoAbb[K, V], desde *K, hasta *K, cmp func
 		return false
 	}
 
-	enRango := true
-	if desde != nil && cmp(nodo.clave, *desde) < 0 {
-		enRango = false
-	}
-	if hasta != nil && cmp(nodo.clave, *hasta) > 0 {
-		enRango = false
-	}
-
-	if enRango && !visitar(nodo.clave, nodo.dato) {
+	if !visitar(nodo.clave, nodo.dato) {
 		return false
 	}
 

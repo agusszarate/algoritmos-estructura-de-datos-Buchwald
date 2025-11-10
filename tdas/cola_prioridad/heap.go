@@ -39,7 +39,7 @@ func (heap *heap[T]) upheap(pos int) {
 	}
 }
 
-func downheapGenerico[T any](arr []T, pos, tam int, cmp func(T, T) int) {
+func downheapRecursivo[T any](arr []T, pos, tam int, cmp func(T, T) int) {
 	posHijoIzq := calcularPosicionHijoIzq(pos)
 	posHijoDer := calcularPosicionHijoDer(pos)
 
@@ -54,12 +54,12 @@ func downheapGenerico[T any](arr []T, pos, tam int, cmp func(T, T) int) {
 
 	if cmp(arr[posMax], arr[pos]) > 0 {
 		swap(arr, pos, posMax)
-		downheapGenerico(arr, posMax, tam, cmp)
+		downheapRecursivo(arr, posMax, tam, cmp)
 	}
 }
 
 func (heap *heap[T]) downheap(pos int) {
-	downheapGenerico(heap.datos, pos, heap.cantidad, heap.cmp)
+	downheapRecursivo(heap.datos, pos, heap.cantidad, heap.cmp)
 }
 
 func (heap *heap[T]) redimensionar(nuevaCapacidad int) {
@@ -71,7 +71,7 @@ func (heap *heap[T]) redimensionar(nuevaCapacidad int) {
 func heapify[T any](arr []T, cmp func(T, T) int) {
 	n := len(arr)
 	for i := calcularPosicionPadre(n - 1); i >= 0; i-- {
-		downheapGenerico(arr, i, n, cmp)
+		downheapRecursivo(arr, i, n, cmp)
 	}
 }
 
@@ -139,6 +139,6 @@ func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 	tam := len(elementos)
 	for i := tam - 1; i > 0; i-- {
 		swap(elementos, 0, i)
-		downheapGenerico(elementos, 0, i, funcion_cmp)
+		downheapRecursivo(elementos, 0, i, funcion_cmp)
 	}
 }

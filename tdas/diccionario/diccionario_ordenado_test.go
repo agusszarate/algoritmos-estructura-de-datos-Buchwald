@@ -12,23 +12,13 @@ import (
 
 var TAMS_VOLUMEN_ABB = []int{1000, 2000, 4000, 8000, 16000}
 
-func comparacionStrings(a, b string) int {
-	if a < b {
-		return -1
-	}
-	if a > b {
-		return 1
-	}
-	return 0
-}
-
 func comparacionInts(a, b int) int {
 	return a - b
 }
 
 func TestABBVacio(t *testing.T) {
 	t.Log("Comprueba que ABB vacio no tiene claves")
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	require.EqualValues(t, 0, abb.Cantidad())
 	require.False(t, abb.Pertenece("A"))
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { abb.Obtener("A") })
@@ -37,7 +27,7 @@ func TestABBVacio(t *testing.T) {
 
 func TestABBClaveDefault(t *testing.T) {
 	t.Log("Prueba sobre un ABB vacío que si justo buscamos la clave que es el default del tipo de dato, sigue sin existir")
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	require.False(t, abb.Pertenece(""))
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { abb.Obtener("") })
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { abb.Borrar("") })
@@ -50,7 +40,7 @@ func TestABBClaveDefault(t *testing.T) {
 
 func TestABBUnElemento(t *testing.T) {
 	t.Log("Comprueba que ABB con un elemento tiene esa Clave, unicamente")
-	abb := TDADiccionario.CrearABB[string, int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, int](strings.Compare)
 	abb.Guardar("A", 10)
 	require.EqualValues(t, 1, abb.Cantidad())
 	require.True(t, abb.Pertenece("A"))
@@ -70,7 +60,7 @@ func TestABBGuardar(t *testing.T) {
 	claves := []string{clave1, clave2, clave3}
 	valores := []string{valor1, valor2, valor3}
 
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	require.False(t, abb.Pertenece(claves[0]))
 	abb.Guardar(claves[0], valores[0])
 	require.EqualValues(t, 1, abb.Cantidad())
@@ -101,7 +91,7 @@ func TestABBReemplazoDato(t *testing.T) {
 	t.Log("Guarda un par de claves, y luego vuelve a guardar, buscando que el dato se haya reemplazado")
 	clave := "Gato"
 	clave2 := "Perro"
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	abb.Guardar(clave, "miau")
 	abb.Guardar(clave2, "guau")
 	require.True(t, abb.Pertenece(clave))
@@ -129,7 +119,7 @@ func TestABBBorrar(t *testing.T) {
 	valor3 := "moo"
 	claves := []string{clave1, clave2, clave3}
 	valores := []string{valor1, valor2, valor3}
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 
 	abb.Guardar(claves[0], valores[0])
 	abb.Guardar(claves[1], valores[1])
@@ -213,7 +203,7 @@ func TestABBBorrarDosHijos(t *testing.T) {
 
 func TestABBReutilizacionDeBorrados(t *testing.T) {
 	t.Log("Prueba de reinserción de un elemento borrado")
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	clave := "hola"
 	abb.Guardar(clave, "mundo!")
 	abb.Borrar(clave)
@@ -241,7 +231,7 @@ func TestABBConClavesNumericas(t *testing.T) {
 
 func TestABBClaveVacia(t *testing.T) {
 	t.Log("Guardamos una clave vacía (i.e. \"\") y deberia funcionar sin problemas")
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 	clave := ""
 	abb.Guardar(clave, clave)
 	require.True(t, abb.Pertenece(clave))
@@ -251,7 +241,7 @@ func TestABBClaveVacia(t *testing.T) {
 
 func TestABBValorNulo(t *testing.T) {
 	t.Log("Probamos que el valor puede ser nil sin problemas")
-	abb := TDADiccionario.CrearABB[string, *int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, *int](strings.Compare)
 	clave := "Pez"
 	abb.Guardar(clave, nil)
 	require.True(t, abb.Pertenece(clave))
@@ -266,7 +256,7 @@ func TestABBIteradorInternoClaves(t *testing.T) {
 	clave1 := "Gato"
 	clave2 := "Perro"
 	clave3 := "Vaca"
-	abb := TDADiccionario.CrearABB[string, *int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, *int](strings.Compare)
 	abb.Guardar(clave2, nil)
 	abb.Guardar(clave1, nil)
 	abb.Guardar(clave3, nil)
@@ -368,7 +358,7 @@ func TestABBIteradorExterno(t *testing.T) {
 
 func TestABBIteradorExternoVacio(t *testing.T) {
 	t.Log("Iterar sobre ABB vacio es simplemente tenerlo al final")
-	abb := TDADiccionario.CrearABB[string, int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, int](strings.Compare)
 	iter := abb.Iterador()
 	require.False(t, iter.HaySiguiente())
 	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.VerActual() })
@@ -456,7 +446,7 @@ func TestABBIterarRangoSinLimites(t *testing.T) {
 
 func TestABBIteradorRango(t *testing.T) {
 	t.Log("Prueba de IteradorRango con diferentes rangos")
-	abb := TDADiccionario.CrearABB[string, int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, int](strings.Compare)
 
 	abb.Guardar("d", 4)
 	abb.Guardar("b", 2)
@@ -512,21 +502,28 @@ func TestABBIteradorRangoVacio(t *testing.T) {
 }
 
 func ejecutarPruebaVolumenABB(b *testing.B, n int) {
-	abb := TDADiccionario.CrearABB[string, int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, int](strings.Compare)
 
 	claves := make([]string, n)
 	valores := make([]int, n)
+	indices := make([]int, n)
 
-	/* Inserta 'n' parejas en el ABB */
 	for i := 0; i < n; i++ {
+		indices[i] = i
 		valores[i] = i
 		claves[i] = fmt.Sprintf("%08d", i)
+	}
+
+	rand.Shuffle(n, func(i, j int) {
+		indices[i], indices[j] = indices[j], indices[i]
+	})
+
+	for _, i := range indices {
 		abb.Guardar(claves[i], valores[i])
 	}
 
 	require.EqualValues(b, n, abb.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	/* Verifica que devuelva los valores correctos */
 	ok := true
 	for i := 0; i < n; i++ {
 		ok = abb.Pertenece(claves[i])
@@ -578,8 +575,8 @@ func TestABBIterarVolumen(t *testing.T) {
 	abb := TDADiccionario.CrearABB[int, int](comparacionInts)
 
 	// Inserto elementos en orden aleatorio
-	elementos := make([]int, 1000)
-	for i := 0; i < 1000; i++ {
+	elementos := make([]int, 10000)
+	for i := 0; i < 10000; i++ {
 		elementos[i] = i
 	}
 	rand.Shuffle(len(elementos), func(i, j int) {
@@ -607,7 +604,7 @@ func TestABBIterarVolumen(t *testing.T) {
 
 func TestABBString(t *testing.T) {
 	t.Log("Valida que el ABB funcione con strings y los ordene correctamente")
-	abb := TDADiccionario.CrearABB[string, string](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, string](strings.Compare)
 
 	abb.Guardar("perro", "guau")
 	abb.Guardar("gato", "miau")
@@ -627,7 +624,7 @@ func TestABBString(t *testing.T) {
 
 func TestABBIteradorRangoString(t *testing.T) {
 	t.Log("Valida el IteradorRango con strings")
-	abb := TDADiccionario.CrearABB[string, int](comparacionStrings)
+	abb := TDADiccionario.CrearABB[string, int](strings.Compare)
 
 	palabras := []string{"casa", "barco", "dado", "elefante", "auto", "foca"}
 	for i, palabra := range palabras {

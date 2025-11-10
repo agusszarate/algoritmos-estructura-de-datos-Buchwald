@@ -1,6 +1,7 @@
 package cola_prioridad_test
 
 import (
+	"math/rand"
 	TDAHeap "tdas/cola_prioridad"
 	"testing"
 
@@ -84,35 +85,52 @@ func TestPropiedadDeHeap(t *testing.T) {
 func TestVolumen(t *testing.T) {
 	heap := TDAHeap.CrearHeap[int](cmpEnteros)
 
-	for i := 0; i < 10000; i++ {
-		heap.Encolar(i)
-		require.Equal(t, i, heap.VerMax())
-		require.Equal(t, i+1, heap.Cantidad())
-		require.False(t, heap.EstaVacia())
+	n := 10000
+	elementos := make([]int, n)
+	for i := 0; i < n; i++ {
+		elementos[i] = i
 	}
 
-	for i := 9999; i >= 0; i-- {
-		require.False(t, heap.EstaVacia())
-		require.Equal(t, i, heap.VerMax())
-		require.Equal(t, i+1, heap.Cantidad())
+	rand.Shuffle(n, func(i, j int) {
+		elementos[i], elementos[j] = elementos[j], elementos[i]
+	})
 
-		elemento := heap.Desencolar()
-		require.Equal(t, i, elemento)
+	for _, elem := range elementos {
+		heap.Encolar(elem)
+	}
+
+	require.Equal(t, n, heap.Cantidad())
+	require.False(t, heap.EstaVacia())
+
+	for i := n - 1; i >= 0; i-- {
+		require.Equal(t, i, heap.VerMax())
+		require.Equal(t, i, heap.Desencolar())
 	}
 
 	require.True(t, heap.EstaVacia())
 	require.Equal(t, 0, heap.Cantidad())
 	require.Panics(t, func() { heap.VerMax() })
+	require.Panics(t, func() { heap.Desencolar() })
 }
 
 func TestHeapVacioUsado(t *testing.T) {
 	heap := TDAHeap.CrearHeap[int](cmpEnteros)
 
-	for i := 0; i < 1000; i++ {
-		heap.Encolar(i)
+	n := 1000
+	elementos := make([]int, n)
+	for i := 0; i < n; i++ {
+		elementos[i] = i
 	}
 
-	for i := 999; i >= 0; i-- {
+	rand.Shuffle(n, func(i, j int) {
+		elementos[i], elementos[j] = elementos[j], elementos[i]
+	})
+
+	for _, elem := range elementos {
+		heap.Encolar(elem)
+	}
+
+	for i := n - 1; i >= 0; i-- {
 		require.Equal(t, i, heap.Desencolar())
 	}
 
@@ -121,7 +139,6 @@ func TestHeapVacioUsado(t *testing.T) {
 	require.Panics(t, func() { heap.VerMax() })
 	require.Panics(t, func() { heap.Desencolar() })
 
-	// Ahora lo volvemos a usar
 	heap.Encolar(42)
 	require.False(t, heap.EstaVacia())
 	require.Equal(t, 1, heap.Cantidad())
@@ -129,7 +146,7 @@ func TestHeapVacioUsado(t *testing.T) {
 }
 
 func TestTiposEnteros(t *testing.T) {
-	heap := TDAHeap.CrearHeap[int](cmpEnteros)
+	heap := TDAHeap.CrearHeap(cmpEnteros)
 
 	enteros := []int{-5, 0, 10, 999, -1000, 50, -50}
 
@@ -278,18 +295,22 @@ func TestCrearHeapArrNoModificaArregloOriginal(t *testing.T) {
 }
 
 func TestCrearHeapArrVolumen(t *testing.T) {
-	arr := make([]int, 10000)
-	for i := 0; i < 10000; i++ {
+	n := 10000
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
 		arr[i] = i
 	}
 
+	rand.Shuffle(n, func(i, j int) {
+		arr[i], arr[j] = arr[j], arr[i]
+	})
+
 	heap := TDAHeap.CrearHeapArr(arr, cmpEnteros)
 
-	require.Equal(t, 10000, heap.Cantidad())
-	require.Equal(t, 9999, heap.VerMax())
+	require.Equal(t, n, heap.Cantidad())
+	require.Equal(t, n-1, heap.VerMax())
 
-	// Verificamos que salen en orden
-	for i := 9999; i >= 0; i-- {
+	for i := n - 1; i >= 0; i-- {
 		require.Equal(t, i, heap.Desencolar())
 	}
 
@@ -349,15 +370,19 @@ func TestHeapSortNegativos(t *testing.T) {
 }
 
 func TestHeapSortVolumen(t *testing.T) {
-	arr := make([]int, 10000)
-	for i := 0; i < 10000; i++ {
-		arr[i] = 10000 - i // Array en orden descendente
+	n := 10000
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		arr[i] = i
 	}
+
+	rand.Shuffle(n, func(i, j int) {
+		arr[i], arr[j] = arr[j], arr[i]
+	})
 
 	TDAHeap.HeapSort(arr, cmpEnteros)
 
-	// Verificamos que quedó ordenado ascendentemente
-	for i := 0; i < 9999; i++ {
+	for i := 0; i < n-1; i++ {
 		require.True(t, arr[i] <= arr[i+1])
 	}
 }
