@@ -115,10 +115,19 @@ func (heap *heap[T]) Cantidad() int {
 	return heap.cantidad
 }
 
-func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
+func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
+	datos_copia := make([]T, len(arreglo))
+	copy(datos_copia, arreglo)
+	heapify(datos_copia, funcion_cmp)
+	capacidad := len(arreglo)
+	if capacidad < _CAPACIDAD_INICIAL {
+		capacidad = _CAPACIDAD_INICIAL
+	}
+	datos_final := make([]T, capacidad)
+	copy(datos_final, datos_copia)
 	return &heap[T]{
-		datos:    make([]T, _CAPACIDAD_INICIAL),
-		cantidad: 0,
+		datos:    datos_final,
+		cantidad: len(arreglo),
 		cmp:      funcion_cmp,
 	}
 }
