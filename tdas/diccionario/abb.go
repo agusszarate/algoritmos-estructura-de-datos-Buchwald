@@ -98,17 +98,21 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	if nodo.izquierdo != nil && nodo.derecho != nil {
 		reemplazo := nodo.derecho
-		padreReemplazo := nodo
 		for reemplazo.izquierdo != nil {
-			padreReemplazo = reemplazo
 			reemplazo = reemplazo.izquierdo
 		}
 
-		nodo.clave = reemplazo.clave
-		nodo.dato = reemplazo.dato
+		claveReemplazo := reemplazo.clave
+		datoReemplazo := reemplazo.dato
 
-		nodo = reemplazo
-		padre = padreReemplazo
+		arbol.Borrar(claveReemplazo)
+
+		nodo.clave = claveReemplazo
+		nodo.dato = datoReemplazo
+
+		arbol.cantidad++
+
+		return dato
 	}
 
 	var hijo *nodoAbb[K, V]
