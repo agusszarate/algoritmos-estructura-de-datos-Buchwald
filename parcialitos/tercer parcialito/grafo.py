@@ -44,6 +44,10 @@ class Grafo:
         """Obtiene los vértices adyacentes a un vértice"""
         raise NotImplementedError("no implementado")
     
+    def peso_arista(self, origen, destino):
+        """Obtiene el peso de la arista entre dos vértices"""
+        raise NotImplementedError("no implementado")
+    
     def cantidad(self):
         """Devuelve la cantidad de vértices"""
         raise NotImplementedError("no implementado")
@@ -101,6 +105,10 @@ class GrafoDirigido:
     
     def obtener_adyacentes(self, clave):
         """Obtiene los vértices adyacentes a un vértice"""
+        raise NotImplementedError("no implementado")
+    
+    def peso_arista(self, origen, destino):
+        """Obtiene el peso de la arista entre dos vértices"""
         raise NotImplementedError("no implementado")
     
     def cantidad(self):

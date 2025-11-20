@@ -1,5 +1,9 @@
 package parcialito
 
+import (
+	. "tdas/cola"
+)
+
 // 1)
 // Sincero Piladibujo, un famoso corredor de autos, se está yendo a la costa a disfrutar sus vacaciones de Semana Santa.
 // Resulta que viene manejando por la ruta y tiene una fila de autos por delante, bastante extensa, que quiere sobrepasar.
@@ -14,37 +18,13 @@ package parcialito
 
 type Auto any
 
-type Cola[Auto any] struct {
-	nodos    any
-	cantidad int
-}
-
-func (c *Cola[Auto]) Desencolar() Auto {
-	// Implementation needed - this is a placeholder
-	var zero Auto
-	if c.cantidad > 0 {
-		c.cantidad--
-	}
-	return zero
-}
-
-func (c *Cola[Auto]) Encolar(auto Auto) {
-	c.cantidad++
-}
-
-func (c Cola[Auto]) EstaVacia() bool {
-	return false
-}
-
 func ObtenerTiempoSobrepaso(auto Auto) int {
 	return 1
 }
 
 func PuedeSobrepasar(filaAutos Cola[Auto], tiempoMaximoDeManiobra int) bool {
 
-	colaAux := Cola[Auto]{
-		cantidad: 0,
-	}
+	colaAux := CrearColaEnlazada[Auto]()
 
 	for filaAutos.EstaVacia() { //O(n)
 		auto := filaAutos.Desencolar() // O(1)
@@ -80,6 +60,22 @@ func PuedeSobrepasar(filaAutos Cola[Auto], tiempoMaximoDeManiobra int) bool {
 // Implementar una función hallarMenor(array []int) int que lo retorne, utilizando División y Conquista.
 // ¿Cuál es la complejidad del algoritmo? Justificar utilizando el Teorema Maestro.
 
+func hallarMenorRecursivo(arr []int) int {
+
+	if len(arr) == 1 {
+		return arr[0]
+	}
+
+	mid := len(arr) / 2
+
+	if arr[mid] > arr[len(arr)-1] {
+		return hallarMenorRecursivo(arr[mid+1:])
+	} else {
+		return hallarMenorRecursivo(arr[:mid+1])
+	}
+
+}
+
 func HallarMenor(array []int) int {
 
 	if len(array) == 1 { // O(1)
@@ -88,10 +84,10 @@ func HallarMenor(array []int) int {
 
 	mid := len(array) / 2 // O(1)
 
-	if array[0] <= array[mid] { // O(1)
-		return HallarMenor(array[:mid]) // O(n / 2)
-	} else {
+	if array[mid] >= array[len(array)-1] { // O(1)
 		return HallarMenor(array[mid:]) // O(n / 2)
+	} else {
+		return HallarMenor(array[:mid+1]) // O(n / 2)
 	}
 
 }
