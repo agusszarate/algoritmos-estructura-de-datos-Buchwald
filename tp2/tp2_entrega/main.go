@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 	"strings"
-	"tp2/algogram"
+	algogram "tp2/red_social"
 )
 
 func cargarUsuarios(ruta string) ([]*algogram.Usuario, error) {
