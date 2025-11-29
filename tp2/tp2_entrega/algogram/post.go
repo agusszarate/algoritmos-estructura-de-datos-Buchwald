@@ -25,16 +25,16 @@ func (post *Post) likear(usuario string) {
 	post.likes.Guardar(usuario, true)
 }
 
-func (post *Post) mostrarLikes() {
+func (post *Post) obtenerLikes() string {
 	if post.likes.Cantidad() == 0 {
-		fmt.Println(ERR_POST_INEXISTENTE_O_SIN_LIKES)
-		return
+		return ERR_POST_INEXISTENTE_O_SIN_LIKES
 	}
-	fmt.Printf("El post tiene %d likes:\n", post.likes.Cantidad())
+	resultado := fmt.Sprintf("El post tiene %d likes:", post.likes.Cantidad())
 	post.likes.Iterar(func(nombre string, _ bool) bool {
-		fmt.Printf("\t%s\n", nombre)
+		resultado += "\n\t" + nombre
 		return true
 	})
+	return resultado
 }
 
 func cmpString(a, b string) int {

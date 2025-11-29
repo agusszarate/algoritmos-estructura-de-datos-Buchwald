@@ -25,32 +25,28 @@ func CrearAlgoGram(listaUsuarios []*Usuario) *AlgoGram {
 	return ag
 }
 
-func (ag *AlgoGram) Login(nombre string) {
+func (ag *AlgoGram) Login(nombre string) string {
 	if ag.usuarioLoggeado != nil {
-		fmt.Println(ERR_USUARIO_YA_LOGGEADO)
-		return
+		return ERR_USUARIO_YA_LOGGEADO
 	}
 	if !ag.usuarios.Pertenece(nombre) {
-		fmt.Println(ERR_USUARIO_NO_EXISTENTE)
-		return
+		return ERR_USUARIO_NO_EXISTENTE
 	}
 	ag.usuarioLoggeado = ag.usuarios.Obtener(nombre)
-	fmt.Printf("Hola %s\n", nombre)
+	return "Hola " + nombre
 }
 
-func (ag *AlgoGram) Logout() {
+func (ag *AlgoGram) Logout() string {
 	if ag.usuarioLoggeado == nil {
-		fmt.Println(ERR_USUARIO_NO_LOGGEADO)
-		return
+		return ERR_USUARIO_NO_LOGGEADO
 	}
 	ag.usuarioLoggeado = nil
-	fmt.Println("Adios")
+	return "Adios"
 }
 
-func (ag *AlgoGram) PublicarPost(mensaje string) {
+func (ag *AlgoGram) PublicarPost(mensaje string) string {
 	if ag.usuarioLoggeado == nil {
-		fmt.Println(ERR_USUARIO_NO_LOGGEADO)
-		return
+		return ERR_USUARIO_NO_LOGGEADO
 	}
 	nuevoPost := crearPost(len(ag.posts), ag.usuarioLoggeado.Nombre, mensaje)
 	ag.posts = append(ag.posts, nuevoPost)
@@ -60,40 +56,36 @@ func (ag *AlgoGram) PublicarPost(mensaje string) {
 			usuario.recibirPost(nuevoPost.Id, ag.usuarioLoggeado.afinidad)
 		}
 	}
-	fmt.Println("Post publicado")
+	return "Post publicado"
 }
 
-func (ag *AlgoGram) VerSiguienteFeed() {
+func (ag *AlgoGram) VerSiguienteFeed() string {
 	if ag.usuarioLoggeado == nil {
-		fmt.Println(ERR_USUARIO_NO_LOGGEADO_O_POSTS_VISTOS)
-		return
+		return ERR_USUARIO_NO_LOGGEADO_O_POSTS_VISTOS
 	}
 
 	idPost := ag.usuarioLoggeado.verSiguientePost()
 	if idPost == -1 {
-		fmt.Println(ERR_USUARIO_NO_LOGGEADO_O_POSTS_VISTOS)
-		return
+		return ERR_USUARIO_NO_LOGGEADO_O_POSTS_VISTOS
 	}
 
 	post := ag.posts[idPost]
-	fmt.Printf("Post ID %d\n%s dijo: %s\nLikes: %d\n", post.Id, post.Autor, post.Mensaje, post.likes.Cantidad())
+	return fmt.Sprintf("Post ID %d\n%s dijo: %s\nLikes: %d", post.Id, post.Autor, post.Mensaje, post.likes.Cantidad())
 }
 
-func (ag *AlgoGram) LikearPost(idStr string) {
+func (ag *AlgoGram) LikearPost(idStr string) string {
 	id, err := strconv.Atoi(idStr)
 	if err != nil || ag.usuarioLoggeado == nil || id < 0 || id >= len(ag.posts) {
-		fmt.Println(ERR_USUARIO_NO_LOGGEADO_O_POST_INEXISTENTE)
-		return
+		return ERR_USUARIO_NO_LOGGEADO_O_POST_INEXISTENTE
 	}
 	ag.posts[id].likear(ag.usuarioLoggeado.Nombre)
-	fmt.Println("Post likeado")
+	return "Post likeado"
 }
 
-func (ag *AlgoGram) MostrarLikes(idStr string) {
+func (ag *AlgoGram) MostrarLikes(idStr string) string {
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id < 0 || id >= len(ag.posts) {
-		fmt.Println(ERR_POST_INEXISTENTE_O_SIN_LIKES)
-		return
+		return ERR_POST_INEXISTENTE_O_SIN_LIKES
 	}
-	ag.posts[id].mostrarLikes()
+	return ag.posts[id].obtenerLikes()
 }

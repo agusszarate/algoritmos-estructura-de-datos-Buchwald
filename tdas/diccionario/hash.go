@@ -155,6 +155,7 @@ func (hash *hashCerrado[K, V]) buscarPosicion(clave K) (int, bool) {
 			break
 		}
 	}
+
 	return -1, false
 }
 

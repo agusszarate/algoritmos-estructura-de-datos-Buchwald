@@ -2,6 +2,7 @@ package algogram
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -20,19 +21,23 @@ func (ag *AlgoGram) Ejecutar() {
 			parametro = partes[1]
 		}
 
+		var mensaje string
 		switch instruccion {
 		case "login":
-			ag.Login(parametro)
+			mensaje = ag.Login(parametro)
 		case "logout":
-			ag.Logout()
+			mensaje = ag.Logout()
 		case "publicar":
-			ag.PublicarPost(parametro)
+			mensaje = ag.PublicarPost(parametro)
 		case "ver_siguiente_feed":
-			ag.VerSiguienteFeed()
+			mensaje = ag.VerSiguienteFeed()
 		case "likear_post":
-			ag.LikearPost(parametro)
+			mensaje = ag.LikearPost(parametro)
 		case "mostrar_likes":
-			ag.MostrarLikes(parametro)
+			mensaje = ag.MostrarLikes(parametro)
+		}
+		if mensaje != "" {
+			fmt.Println(mensaje)
 		}
 	}
 }
