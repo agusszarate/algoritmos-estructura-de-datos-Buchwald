@@ -4,39 +4,43 @@ import (
 	"bufio"
 	"os"
 	"strings"
+	algogram "tp2/red_social"
 )
+
+func cargarUsuarios(ruta string) ([]*algogram.Usuario, error) {
+	archivo, err := os.Open(ruta)
+	if err != nil {
+		return nil, err
+	}
+	defer archivo.Close()
+
+	var lista []*algogram.Usuario
+	scanner := bufio.NewScanner(archivo)
+	idx := 0
+
+	for scanner.Scan() {
+		nombre := strings.TrimSpace(scanner.Text())
+		if nombre == "" {
+			continue
+		}
+
+		usuario := algogram.CrearUsuario(nombre, idx)
+		lista = append(lista, usuario)
+		idx++
+	}
+	return lista, scanner.Err()
+}
 
 func main() {
 	if len(os.Args) < 2 {
 		return
 	}
-	ag, err := crearAlgoGram(os.Args[1])
+
+	usuarios, err := cargarUsuarios(os.Args[1])
 	if err != nil {
 		return
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		linea := scanner.Text()
-		if len(strings.TrimSpace(linea)) == 0 {
-			continue
-		}
-		partes := strings.SplitN(linea, " ", 2)
-		instruccion := partes[0]
-
-		switch instruccion {
-		case "login":
-			ag.login(partes[1])
-		case "logout":
-			ag.logout()
-		case "publicar":
-			ag.publicarPost(partes[1])
-		case "ver_siguiente_feed":
-			ag.verSiguienteFeed()
-		case "likear_post":
-			ag.likearPost(partes[1])
-		case "mostrar_likes":
-			ag.mostrarLikes(partes[1])
-		}
-	}
+	sistema := algogram.CrearAlgoGram(usuarios)
+	sistema.Ejecutar()
 }
