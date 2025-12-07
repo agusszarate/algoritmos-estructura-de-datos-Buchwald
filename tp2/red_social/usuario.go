@@ -5,7 +5,7 @@ import (
 )
 
 type Usuario struct {
-	Nombre   string
+	nombre   string
 	afinidad int
 	feed     TDAColaPrioridad.ColaPrioridad[itemFeed]
 }
@@ -17,18 +17,26 @@ type itemFeed struct {
 
 func CrearUsuario(nombre string, afinidad int) *Usuario {
 	return &Usuario{
-		Nombre:   nombre,
+		nombre:   nombre,
 		afinidad: afinidad,
 		feed:     TDAColaPrioridad.CrearHeap(cmpFeed),
 	}
 }
 
-func (usuario *Usuario) recibirPost(idPost int, afinidadAutor int) {
-	afinidad := abs(usuario.afinidad - afinidadAutor)
-	usuario.feed.Encolar(itemFeed{afinidad: afinidad, idPost: idPost})
+func (usuario *Usuario) ObtenerNombre() string {
+	return usuario.nombre
 }
 
-func (usuario *Usuario) verSiguientePost() int {
+func (usuario *Usuario) ObtenerPosicion() int {
+	return usuario.afinidad
+}
+
+func (usuario *Usuario) RecibirPost(idPost int, posicionAutor int) {
+	distancia := abs_usuario(usuario.afinidad - posicionAutor)
+	usuario.feed.Encolar(itemFeed{afinidad: distancia, idPost: idPost})
+}
+
+func (usuario *Usuario) VerSiguientePost() int {
 	if usuario.feed.EstaVacia() {
 		return -1
 	}
@@ -42,7 +50,7 @@ func cmpFeed(a, b itemFeed) int {
 	return b.idPost - a.idPost
 }
 
-func abs(n int) int {
+func abs_usuario(n int) int {
 	if n < 0 {
 		return -n
 	}

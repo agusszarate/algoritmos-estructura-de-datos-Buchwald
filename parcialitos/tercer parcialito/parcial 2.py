@@ -6,41 +6,92 @@ from heap import Heap
 # Indicar y justificar la complejidad de la función. 
 # Pista: pensar qué condición puede darse para que exista más de un posible orden topológico.
 
-def obtener_grados(grafo: GrafoDirigido): #Total O(2V + E) == O(V + E)
-    grados = {} #O(1)
+def obtener_grados(grafo: Grafo):
+    grados = {}
 
-    for v in grafo: #O(V)
-        grados[v] = 0#O(1)
+    for v in grafo:
+        grados[v] = 0
 
-    for v in grafo: # O(V)
-        for w in grafo.obtener_adyacentes(v): #O(E)
-            grados[w] += 1 #O(1)
+    for v in grafo: 
+        for w in grafo.obtener_adyacentes(v): 
+            grados[w] += 1
+    
+    return grados
 
-    return grados #O(1)
+def unicoOrdenTopologico(grafo: Grafo):
+    grados = obtener_grados(grafo) 
+
+    cola = Cola()
+
+    for v in grados.keys():
+        if grados[v] == 0:
+            cola.encolar(v)
+
+    while not cola.esta_vacia(): 
+        elem = cola.desencolar()
+
+        if not cola.esta_vacia():
+            return False
+
+        for w in grafo.obtener_adyacentes(elem):
+            grados[w] -= 1
+
+            if grados[w] == 0:
+                cola.encolar(w)
+
+    return True
+        
 
 
-def admite_unico_order_topologico(grafo: GrafoDirigido): #Total O(V + E)
-    grados = obtener_grados(grafo) #O(V + E) por cada vertice miro sus adyacentes
 
-    cola = Cola() #O(1)
 
-    for v in grados.keys(): #O(V)
-        if grados[v] == 0: #O(1)
-            cola.encolar(v) #O(1)
 
-    while not cola.esta_vacia(): # O(V + E) por cada vertice miro sus adyacentes
 
-        if len(cola) > 1: #O(1)
-            return False #O(1)
 
-        v = cola.desencolar() #O(1)
 
-        for w in grafo.obtener_adyacentes(v): #O(E)
-            grados[w] -= 1 #O(1)
-            if grados[w] == 0: #O(1)
-                cola.encolar(w) #O(1)
 
-    return True #O(1)
+
+
+
+
+
+
+
+# def obtener_grados(grafo: GrafoDirigido): #Total O(2V + E) == O(V + E)
+#     grados = {} #O(1)
+
+#     for v in grafo: #O(V)
+#         grados[v] = 0#O(1)
+
+#     for v in grafo: # O(V)
+#         for w in grafo.obtener_adyacentes(v): #O(E)
+#             grados[w] += 1 #O(1)
+
+#     return grados #O(1)
+
+
+# def admite_unico_order_topologico(grafo: GrafoDirigido): #Total O(V + E)
+#     grados = obtener_grados(grafo) #O(V + E) por cada vertice miro sus adyacentes
+
+#     cola = Cola() #O(1)
+
+#     for v in grados.keys(): #O(V)
+#         if grados[v] == 0: #O(1)
+#             cola.encolar(v) #O(1)
+
+#     while not cola.esta_vacia(): # O(V + E) por cada vertice miro sus adyacentes
+
+#         if len(cola) > 1: #O(1)
+#             return False #O(1)
+
+#         v = cola.desencolar() #O(1)
+
+#         for w in grafo.obtener_adyacentes(v): #O(E)
+#             grados[w] -= 1 #O(1)
+#             if grados[w] == 0: #O(1)
+#                 cola.encolar(w) #O(1)
+
+#     return True #O(1)
 
 # Se tiene una app de tránsito que indica el mejor camino desde un punto A a un punto B.
 # Esta app trabaja con un grafo dirigido de las calles de la Ciudad Autónoma de Buenos Aires, 
@@ -58,6 +109,78 @@ def admite_unico_order_topologico(grafo: GrafoDirigido): #Total O(V + E)
 # y como valores su estado correspondiente), un punto A y un punto B,
 # y determine la forma más rápida para llegar desde A hasta B, considerando el estado dado por el informe. 
 # Indicar y justificar la complejidad del algoritmo implementado.
+
+CONGESTIONADA = 'CONGESTIONADA'
+
+HABILITADA = 'HABILITADA'
+
+CORTADA = 'CORTADA'
+
+def recontruir_caminoo(padres, destino):
+    next = destino
+    camino = []
+
+    while next is not None:
+        camino.append(next)
+        next = padres[next]
+
+    return camino[::-1]
+
+
+
+def mapaa(grafo: Grafo, informe, origen, destino):
+    visitados = set()
+    padres = {}
+    distancias = {}
+    
+    for v in grafo:
+        distancias[v] = float('inf')
+        padres[v] = None
+
+    distancias[origen] = 0
+
+    def func_cmp(a, b):
+        if a[0] > b[0]: 
+            return -1
+        elif a[0] < b[0]: 
+            return 1
+        else:
+            return 0
+
+    cola = Heap(func_cmp)
+
+    cola.encolar((0, origen))
+
+    while not cola.esta_vacia():
+        distancia, elem = cola.desencolar()
+
+
+        if distancia <= distancias[elem]:
+
+            if elem == destino:
+                return recontruir_caminoo(padres, destino)
+
+            visitados.add(elem)
+
+            for w in grafo.obtener_adyacentes(elem):
+                if w not in visitados:
+                    tiempo, nombre = grafo.peso_arista(elem, w)
+
+                    tiempo_total = tiempo
+
+                    if informe[nombre] != CORTADA:
+                        if informe[nombre] == CONGESTIONADA:   
+                            tiempo_total *= 2
+                        
+                        dist_v = distancia + tiempo_total
+
+                        if dist_v < distancias[w]:
+                            padres[w] = elem
+                            distancias[w] = dist_v
+                            cola.encolar((dist_v, w))
+
+
+
 
 CONGESTIONADA = 'CONGESTIONADA'
 

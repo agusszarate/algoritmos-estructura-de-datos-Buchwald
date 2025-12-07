@@ -36,6 +36,7 @@ func (ag *AlgoGram) Ejecutar() {
 		case "mostrar_likes":
 			mensaje = ag.MostrarLikes(parametro)
 		}
+
 		if mensaje != "" {
 			fmt.Println(mensaje)
 		}

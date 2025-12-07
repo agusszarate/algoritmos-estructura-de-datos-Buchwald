@@ -1,31 +1,35 @@
 #!/usr/bin/python3
-
 import sys
 from grafo import Grafo
 
 def cargar_grafo(archivo):
-    grafo = Grafo()
+
+    grafo = Grafo(es_dirigido=True)
 
     try:
         with open(archivo, 'r', encoding='utf-8') as f:
             for linea in f:
-                partes = linea.strip().split('\t')
-                if not partes:
+
+                campos = linea.strip().split('\t')
+                
+                if not campos:
                     continue
 
-                pagina = partes[0]
-                grafo.agregar_vertice(pagina)
+                origen = campos[0]
+                grafo.agregar_vertice(origen)
 
-                for i in range(1, len(partes)):
-                    link = partes[i]
-                    if link:
-                        grafo.agregar_vertice(link)
-                        grafo.agregar_arista(pagina, link)
+                for destino in campos[1:]:
+                    if not destino:
+                        continue
+                        
+                    grafo.agregar_vertice(destino)
+                    grafo.agregar_arista(origen, destino)
 
         return grafo
+
     except FileNotFoundError:
-        print(f"Error: no se pudo abrir el archivo {archivo}", file=sys.stderr)
-        sys.exit(1)
+        print(f"Error: El archivo '{archivo}' no fue encontrado.", file=sys.stderr)
+        sys.exit(1) 
     except Exception as e:
-        print(f"Error al cargar el grafo: {e}", file=sys.stderr)
+        print(f"Error inesperado al cargar el grafo: {e}", file=sys.stderr)
         sys.exit(1)

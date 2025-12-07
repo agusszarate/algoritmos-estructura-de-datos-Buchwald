@@ -6,26 +6,42 @@ import (
 )
 
 type Post struct {
-	Id      int
-	Autor   string
-	Mensaje string
+	id      int
+	autor   string
+	mensaje string
 	likes   TDADiccionario.DiccionarioOrdenado[string, bool]
 }
 
 func crearPost(id int, autor, mensaje string) *Post {
 	return &Post{
-		Id:      id,
-		Autor:   autor,
-		Mensaje: mensaje,
+		id:      id,
+		autor:   autor,
+		mensaje: mensaje,
 		likes:   TDADiccionario.CrearABB[string, bool](cmpString),
 	}
 }
 
-func (post *Post) likear(usuario string) {
+func (post *Post) ObtenerId() int {
+	return post.id
+}
+
+func (post *Post) ObtenerAutor() string {
+	return post.autor
+}
+
+func (post *Post) ObtenerMensaje() string {
+	return post.mensaje
+}
+
+func (post *Post) ObtenerCantidadLikes() int {
+	return post.likes.Cantidad()
+}
+
+func (post *Post) Likear(usuario string) {
 	post.likes.Guardar(usuario, true)
 }
 
-func (post *Post) obtenerLikes() string {
+func (post *Post) ObtenerLikesFormato() string {
 	if post.likes.Cantidad() == 0 {
 		return ERR_POST_INEXISTENTE_O_SIN_LIKES
 	}
