@@ -36,7 +36,6 @@ def rango(grafo, params):
     except ValueError:
         return
 
-    # Llamamos a la función que cuenta nodos a distancia exacta n
     cantidad = biblioteca.cantidad_en_rango(grafo, pagina, n)
     print(cantidad)
 
@@ -47,20 +46,16 @@ def navegacion(grafo, params):
     origen = params[0]
     resultado = biblioteca.navegacion_primer_link(grafo, origen)
 
-    # El formato de salida es simplemente la lista unida por flechas
-    # Si solo hay 1 elemento (el origen sin links), se imprime solo.
     print(" -> ".join(resultado))
 
 def clustering(grafo, params):
-    # Caso 1: Promedio de toda la red
     if len(params) == 0:
         c = biblioteca.clustering_promedio(grafo)
         print(f"{c:.3f}")
     
-    # Caso 2: Clustering de una página específica
     elif len(params) == 1:
         pagina = params[0]
-        # Si la página no existe, por definición devolvemos 0.000 (o validamos antes)
+
         if not grafo.vertice_pertenece(pagina):
             print("0.000")
             return
@@ -69,7 +64,6 @@ def clustering(grafo, params):
         print(f"{c:.3f}")
 
 def lectura(grafo, params):
-    # params ya es una lista de páginas ["p1", "p2", ...]
     if not params:
         return
 

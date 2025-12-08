@@ -1,0 +1,5 @@
+camino Python,Assembly
+rango Python,2
+navegacion Python
+clustering Python
+lectura Python,Java,C,Assembly

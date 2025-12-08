@@ -1,0 +1,7 @@
+camino A,E
+rango A,2
+navegacion A
+clustering
+clustering B
+lectura A,B,C,D,E
+listar_operaciones
