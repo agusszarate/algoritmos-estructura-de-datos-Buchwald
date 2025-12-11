@@ -35,11 +35,11 @@ def crear_heap(funcion_cmp):
     raise NotImplementedError("no implementado")
 
 
-def crear_heap_desde_lista(lista, funcion_cmp):
+def crear_heap_desde_lista(lista, funcion_cmp) -> Heap:
     """Crea un heap a partir de una lista con la función de comparación dada"""
     raise NotImplementedError("no implementado")
 
 
-def heap_sort(elementos, funcion_cmp):
+def heap_sort(elementos, funcion_cmp) -> list:
     """Ordena una lista usando heap sort"""
     raise NotImplementedError("no implementado")

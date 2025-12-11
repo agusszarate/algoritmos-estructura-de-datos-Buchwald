@@ -16,9 +16,9 @@ class Cola:
         """Devuelve el primer elemento sin desencolarlo"""
         raise NotImplementedError("no implementado")
     
-    def esta_vacia(self):
+    def esta_vacia(self) -> bool:
         """Verifica si la cola está vacía"""
-        raise NotImplementedError("no implementado")
+        return True
     
     def __len__(self):
         """Devuelve la cantidad de elementos en la cola"""
