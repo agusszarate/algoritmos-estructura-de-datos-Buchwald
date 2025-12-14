@@ -1,29 +1,47 @@
 import random
 
 class Grafo:
-    def __init__(self, es_dirigido=True, es_pesado=False):
+    def __init__(self, es_dirigido=True):
         self.vertices = {}
         self.es_dirigido = es_dirigido
-        self.es_pesado = es_pesado
 
     def agregar_vertice(self, vertice):
         if vertice not in self.vertices:
-            self.vertices[vertice] = {} if self.es_pesado else set()
+            self.vertices[vertice] = {}
 
-    def agregar_arista(self, origen, destino, peso=1):
+    def borrar_vertice(self, vertice):
+        if vertice not in self.vertices:
+            return None
+
+        self.vertices.pop(vertice)
+
+        for v in self.vertices:
+            if vertice in self.vertices[v]:
+                self.vertices[v].pop(vertice)
+
+    def agregar_arista(self, origen, destino):
         if origen not in self.vertices or destino not in self.vertices:
             return False
-        peso_real = peso if self.es_pesado else 1
-        self._agregar_conexion(origen, destino, peso_real)
+        
+        self._agregar_conexion(origen, destino)
+        
         if not self.es_dirigido:
-            self._agregar_conexion(destino, origen, peso_real)       
+            self._agregar_conexion(destino, origen)       
         return True
 
-    def _agregar_conexion(self, desde, hasta, peso):
-        if self.es_pesado:
-            self.vertices[desde][hasta] = peso
-        else:
-            self.vertices[desde].add(hasta)
+    def borrar_arista(self, origen, destino):
+        if not self.estan_unidos(origen, destino):
+            return None
+        
+        peso = self.vertices[origen].pop(destino)
+        
+        if not self.es_dirigido:
+            self.vertices[destino].pop(origen)
+            
+        return peso
+
+    def _agregar_conexion(self, desde, hasta):
+        self.vertices[desde][hasta] = 1
 
     def estan_unidos(self, origen, destino):
         if origen not in self.vertices: return False
@@ -32,11 +50,7 @@ class Grafo:
     def peso_arista(self, origen, destino):
         if not self.estan_unidos(origen, destino):
             return None 
-        
-        if self.es_pesado:
-            return self.vertices[origen][destino]
-        else:
-            return 1 
+        return self.vertices[origen][destino]
 
     def obtener_vertices(self):
         return self.vertices.keys()
@@ -50,10 +64,7 @@ class Grafo:
 
     def adyacentes(self, vertice):
         if vertice not in self.vertices: return []
-        
-        if self.es_pesado:
-            return list(self.vertices[vertice].keys())
-        return list(self.vertices[vertice])
+        return list(self.vertices[vertice].keys())
 
     def __len__(self):
         return len(self.vertices)
@@ -62,4 +73,4 @@ class Grafo:
         return iter(self.vertices)
     
     def __str__(self):
-        return f"Grafo(Vertices={len(self)}, Dirigido={self.es_dirigido}, Pesado={self.es_pesado})"
+        return f"Grafo(Vertices={len(self)}, Dirigido={self.es_dirigido}"

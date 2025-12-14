@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import sys
-from netstats.carga import cargar_grafo
-from netstats.comandos import ejecutar_comando
+from carga import cargar_grafo
+from comandos import ejecutar_comando
 
 def parsear_comando(linea):
     linea = linea.strip()
@@ -27,7 +27,6 @@ def procesar_comandos(grafo):
 
 def main():
     if len(sys.argv) != 2:
-        print("Uso: ./netstats <archivo>", file=sys.stderr)
         sys.exit(1)
 
     archivo = sys.argv[1]
